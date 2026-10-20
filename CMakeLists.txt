@@ -15,6 +15,15 @@ add_executable(rubiks_solver
     src/Cube.cpp
 )
 
+add_executable(cube_tests
+    tests/CubeTests.cpp
+    src/Cube.cpp
+)
+
+target_include_directories(cube_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 target_include_directories(rubiks_solver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
@@ -26,3 +35,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wpedantic
     )
 endif()
+
+enable_testing()
+
+add_test(
+    NAME CubeInitialization
+    COMMAND cube_tests
+)

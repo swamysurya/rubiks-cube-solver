@@ -24,7 +24,12 @@ public:
         FaceCount * StickersPerFace;
 
     Cube();
+
     void print() const;
+
+    Color getSticker(std::size_t index) const;
+    
+    bool isSolved() const;  
 
 private:
     // Creates a fixed-size collection of 54 colors. It is not dynamically resized.

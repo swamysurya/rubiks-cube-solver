@@ -21,22 +21,48 @@ Cube::Cube() {
     }
 }
 
-void Cube::print() const {
-    for (std::size_t i = 0; i < StickerCount; ++i) {
-        switch (stickers[i]) {
-            case Color::White:  std::cout << 'W'; break;
-            case Color::Yellow: std::cout << 'Y'; break;
-            case Color::Red:    std::cout << 'R'; break;
-            case Color::Orange: std::cout << 'O'; break;
-            case Color::Blue:   std::cout << 'B'; break;
-            case Color::Green:  std::cout << 'G'; break;
-        }
 
-        if ((i + 1) % StickersPerFace == 0) {
+void Cube::print() const {
+    for (std::size_t face = 0; face < FaceCount; ++face) {
+        std::cout << "Face " << face << ":\n";
+
+        for (std::size_t row = 0; row < 3; ++row) {
+            for (std::size_t col = 0; col < 3; ++col) {
+                const std::size_t index =
+                    face * StickersPerFace + row * 3 + col;
+
+                switch (stickers[index]) {
+                    case Color::White:  std::cout << 'W'; break;
+                    case Color::Yellow: std::cout << 'Y'; break;
+                    case Color::Red:    std::cout << 'R'; break;
+                    case Color::Orange: std::cout << 'O'; break;
+                    case Color::Blue:   std::cout << 'B'; break;
+                    case Color::Green:  std::cout << 'G'; break;
+                }
+                std::cout << ' ';
+            }
             std::cout << '\n';
-        } else {
-            std::cout << ' ';
         }
+        std::cout << '\n';
     }
 }
 
+Color Cube::getSticker(std::size_t index) const {
+    return stickers.at(index);
+}
+
+
+bool Cube::isSolved() const {
+    for (std::size_t face = 0; face < FaceCount; ++face) {
+        const std::size_t start = face * StickersPerFace;
+        const Color faceColor = stickers[start];
+
+        for (std::size_t i = 1; i < StickersPerFace; ++i) {
+            if (stickers[start + i] != faceColor) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}

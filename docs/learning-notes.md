@@ -141,3 +141,29 @@ cmake -S . -B build -G "MinGW Makefiles"
 - A two-dimensional logical position can be mapped to a flat array using:
   `flatIndex = rowIndex * rowWidth + columnIndex`.
 - CMake must list the source files required to build an executable.
+
+
+### Displaying a Cube Face as a Grid
+- Nested loops can represent rows and columns in a 2D grid.
+- A flat array can represent a 2D structure using row-major indexing.
+- For a 3x3 face, the local index is `row * 3 + col`.
+- The global index is `face * 9 + row * 3 + col`.
+- A readable state display helps debug future cube rotations.
+- std::boolalpha : it will print 'true' or 'false' in cout instead 1 or 0
+
+
+### State Inspection and Validation
+- Public getters allow controlled observation of private state.
+- `std::array::at()` checks bounds and throws `std::out_of_range` for an invalid index.
+- A Boolean function can report whether a condition holds.
+- Returning `false` early avoids unnecessary checks after a failure is found.
+- A solved-state check is not the same as complete cube-state validation.
+
+
+### CTest — Registering Automated Tests
+- CTest is CMake's test-running tool.
+- `enable_testing()` enables testing support for the project.
+- `add_test()` registers a test with a name and command.
+- `ctest --test-dir build` runs registered tests from the build directory.
+- `--output-on-failure` displays output for failed tests.
+- Automated tests help detect regressions after code changes.
