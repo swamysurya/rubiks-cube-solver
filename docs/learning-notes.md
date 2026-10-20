@@ -103,3 +103,14 @@ cmake -S . -B build -G "MinGW Makefiles"
 - `cmake -S . -B build` configures the project using the current directory as the source and `build/` as the build directory.
 - `cmake --build build` builds the configured targets.
 - Generated build files belong in the build directory and should not be committed.
+
+## Cube Representation — Design Decisions
+
+- A standard 3×3×3 Rubik's Cube has six faces and 54 sticker positions.
+- `enum class` represents a restricted set of named values, such as sticker colors.
+- `std::array` is appropriate when the number of elements is fixed at compile time.
+- A class encapsulates data and the operations that work on that data.
+- A face-index convention prevents inconsistent indexing across cube operations.
+- Row-major indexing stores a 3×3 face as three consecutive rows.
+- Architecture documentation records design decisions and helps future contributors understand the project.
+- Design and testing should precede complex move and solver implementations.
