@@ -1,9 +1,8 @@
-
-#include <iostream>
+#include "Cube.hpp"
 
 int main() {
-    std::cout << "Rubik's Cube Solver\n";
-    std::cout << "Project initialized successfully!\n";
+    Cube cube;
+    cube.print();
 
     return 0;
 }

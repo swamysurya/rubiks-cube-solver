@@ -114,3 +114,30 @@ cmake -S . -B build -G "MinGW Makefiles"
 - Row-major indexing stores a 3×3 face as three consecutive rows.
 - Architecture documentation records design decisions and helps future contributors understand the project.
 - Design and testing should precede complex move and solver implementations.
+
+
+## C++ — First Cube Class Declaration
+
+- A header file (`.hpp`) can declare types and class interfaces.
+- A source file (`.cpp`) can provide function implementations.
+- Header guards prevent repeated inclusion of a header within a translation unit.
+- `enum class` provides scoped enumeration values.
+- `std::array<T, N>` stores a fixed number of elements of type `T`.
+- `static constexpr` defines compile-time constants associated with a class.
+- `std::size_t` is commonly used for collection sizes and indexing.
+- `private` encapsulates internal state so callers cannot modify it directly.
+- A class declaration defines its structure; initialization behavior still needs to be implemented.
+
+
+### Constructors
+- A constructor initializes an object when it is created.
+- A constructor has the same name as its class and has no return type.
+- A constructor can be declared in a header and implemented in a source file.
+
+### Cube Constructor Implementation
+- `ClassName::functionName()` defines a class member outside its class declaration.
+- Nested loops can iterate over faces and stickers.
+- `std::array` supports indexed access using `operator[]`.
+- A two-dimensional logical position can be mapped to a flat array using:
+  `flatIndex = rowIndex * rowWidth + columnIndex`.
+- CMake must list the source files required to build an executable.

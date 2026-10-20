@@ -12,6 +12,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(rubiks_solver
     src/main.cpp
+    src/Cube.cpp
+)
+
+target_include_directories(rubiks_solver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
