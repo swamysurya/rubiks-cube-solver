@@ -1,0 +1,6 @@
+
+# Windows executables
+*.exe
+
+# CMake build directory
+build/
