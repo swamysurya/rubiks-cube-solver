@@ -167,3 +167,309 @@ cmake -S . -B build -G "MinGW Makefiles"
 - `ctest --test-dir build` runs registered tests from the build directory.
 - `--output-on-failure` displays output for failed tests.
 - Automated tests help detect regressions after code changes.
+
+
+---------------------------
+# CMAKE
+
+
+# Rubik's Cube Solver — Learning Notes
+
+## 1. What is CMake?
+
+CMake is a build-system generator. It reads `CMakeLists.txt` and generates build instructions for tools such as MinGW Makefiles.
+
+CMake does not directly compile C++ code. It configures the build process and coordinates the compiler and build tool.
+
+### Build workflow
+
+1. Write C++ source files.
+2. Configure the project using CMake.
+3. Generate build instructions.
+4. Compile and link the source files.
+5. Run the generated executable.
+
+## 2. What is `CMakeLists.txt`?
+
+`CMakeLists.txt` is the configuration file that describes how our C++ project should be built.
+
+### Important commands
+
+**Minimum CMake version**
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+```
+
+Declares the minimum CMake version required by the project.
+
+**Project declaration**
+
+```cmake
+project(RubiksCubeSolver
+    VERSION 1.0.0
+    LANGUAGES CXX
+)
+```
+
+- `RubiksCubeSolver`: project name.
+- `VERSION 1.0.0`: project version.
+- `LANGUAGES CXX`: project uses C++.
+
+**C++ standard**
+
+```cmake
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+```
+
+- Requests C++20.
+- Requires the requested standard.
+- Requests standard C++ instead of compiler-specific extensions.
+
+**Create an executable**
+
+```cmake
+add_executable(rubiks_solver
+    src/main.cpp
+    src/Cube.cpp
+)
+```
+
+- `add_executable()` creates a build target.
+- `rubiks_solver` is the target name.
+- `main.cpp` contains the application entry point.
+- `Cube.cpp` contains the Cube class implementation.
+
+CMake compiles the source files and links them into an executable.
+
+**Configure header search directories**
+
+```cmake
+target_include_directories(rubiks_solver PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+```
+
+- Tells the compiler where to find header files.
+- `PRIVATE` applies the directory to this target.
+- `CMAKE_CURRENT_SOURCE_DIR` refers to the directory containing the top-level `CMakeLists.txt`.
+
+**Compiler warnings**
+
+```cmake
+target_compile_options(rubiks_solver PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+```
+
+- `-Wall`: enables a useful set of warnings.
+- `-Wextra`: enables additional warnings.
+- `-Wpedantic`: warns about certain non-standard language extensions.
+
+These options help identify potential mistakes during compilation.
+
+## 3. Why do we have two executable targets?
+
+Our project has two independent programs.
+
+### Application target
+
+```cmake
+add_executable(rubiks_solver
+    src/main.cpp
+    src/Cube.cpp
+)
+```
+
+Purpose: run the actual Rubik's Cube Solver application.
+
+### Test target
+
+```cmake
+add_executable(cube_tests
+    tests/CubeTests.cpp
+    src/Cube.cpp
+)
+```
+
+Purpose: execute automated checks against the Cube class.
+
+Both programs need `Cube.cpp` because both use the Cube implementation.
+
+They have separate `main()` functions, so they must be built as separate executables.
+
+## 4. What is `tests/CubeTests.cpp`?
+
+`CubeTests.cpp` contains code that checks whether the Cube class behaves as expected.
+
+Testing helps us detect mistakes without manually inspecting output every time.
+
+### Include required files
+
+```cpp
+#include "Cube.hpp"
+#include <cassert>
+#include <iostream>
+```
+
+- `Cube.hpp`: declares the Cube class.
+- `<cassert>`: provides the `assert()` macro.
+- `<iostream>`: provides `std::cout`.
+
+### Create a Cube object
+
+```cpp
+Cube cube;
+```
+
+This creates a Cube object. Its constructor initializes the sticker colors.
+
+### Test the solved state
+
+```cpp
+assert(cube.isSolved());
+```
+
+`assert()` checks a condition.
+
+- If the condition is true, execution continues.
+- If the condition is false, the assertion reports a failure and normally terminates the program.
+
+Assertions are disabled when `NDEBUG` is defined, so a more robust test setup may be needed for release builds.
+
+### Loop through the faces
+
+```cpp
+for (std::size_t face = 0;
+     face < Cube::FaceCount;
+     ++face) {
+    // Test the face.
+}
+```
+
+This visits all six faces, with indices from 0 to 5.
+
+### Calculate a face's starting index
+
+```cpp
+const std::size_t start =
+    face * Cube::StickersPerFace;
+```
+
+Each face has nine stickers.
+
+| Face index | Starting sticker index |
+|---:|---:|
+| 0 | 0 |
+| 1 | 9 |
+| 2 | 18 |
+| 3 | 27 |
+| 4 | 36 |
+| 5 | 45 |
+
+### Compare sticker colors
+
+```cpp
+const Color expectedColor = cube.getSticker(start);
+
+assert(cube.getSticker(start + i) == expectedColor);
+```
+
+The first sticker on the face becomes the expected color. The remaining eight stickers are compared against it.
+
+If a sticker has a different color, the assertion fails.
+
+This checks that every face is uniform, but it does not prove that an arbitrary cube arrangement is physically solvable.
+
+### Successful test output
+
+```cpp
+std::cout << "PASS: Every face has a uniform color.\n";
+return 0;
+```
+
+The message is printed if execution reaches this line. Returning `0` indicates successful program execution.
+
+## 5. What is CTest?
+
+CTest is the test-running tool provided by CMake.
+
+**Enable testing**
+
+```cmake
+enable_testing()
+```
+
+Enables testing support for the project.
+
+**Register a test**
+
+```cmake
+add_test(
+    NAME CubeInitialization
+    COMMAND cube_tests
+)
+```
+
+- `NAME`: gives the test a descriptive name.
+- `COMMAND`: specifies the executable CTest should run.
+
+The test executable performs the checks; CTest launches it and reports the result.
+
+## 6. Important terminal commands
+
+**Configure the project**
+
+```powershell
+cmake -S . -B build
+```
+
+- `-S .`: use the current directory as the source directory.
+- `-B build`: put generated build files in `build/`.
+
+**Build all configured targets**
+
+```powershell
+cmake --build build
+```
+
+**Run the test executable directly**
+
+```powershell
+.\build\cube_tests.exe
+```
+
+**Run registered tests**
+
+```powershell
+ctest --test-dir build --output-on-failure
+```
+
+**Inspect Git changes**
+
+```powershell
+git status
+git diff
+```
+
+**Commit and push changes**
+
+```powershell
+git add CMakeLists.txt tests/CubeTests.cpp docs/learning-notes.md
+git commit -m "test: add cube initialization checks"
+git push
+```
+
+## 7. Key concepts to remember
+
+1. CMake describes and configures the build process.
+2. `CMakeLists.txt` defines targets, source files, include paths, and compiler options.
+3. A build target is a named output CMake knows how to build.
+4. Application code and test code should be separate.
+5. Tests check expected behavior, not just whether code compiles.
+6. CTest runs registered tests and reports their results.
+7. Small, automated tests help prevent regressions as the project grows.
