@@ -44,22 +44,62 @@ git diff
 git ls-files
 ```
 
+
 ### Terminal commands
 
 ```powershell
 Get-ChildItem -Recurse -File
+winget install Kitware.CMake
 ```
 
 ### git commit msg formats
-
+```
 <type>: <short description>
+```
 
 Common types:
 Type	When to use	Example
-feat	New functionality	feat: add cube rotation logic
+feat	dNew functionality	feat: add cube rotation logic
 fix	Bug fix	fix: correct cube move validation
 docs	Documentation changes	docs: add project requirements
 build	Build system changes	build: configure CMake
 test	Adding or updating tests	test: add cube initialization tests
 refactor	Restructure code without changing behavior	refactor: simplify cube state representation
 chore	Maintenance tasks	chore: add executable to gitignore
+
+VS Code's terminal inherits environment variables when the VS Code process starts. When you install CMake, the installer may update Windows' PATH, but your already-open VS Code process can keep the old environment. After restarting VS Code, the new terminal inherits the updated PATH, so cmake --version works.
+
+```
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+```
+
+Check whether CMake is installed
+```
+winget list --id Kitware.CMake
+```
+
+
+CMake lets us describe the project once in a configuration file. It then generates the build instructions needed by the available build tool.
+CMakeLists.txt
+Project name, source files, C++ standard, compiler options
+
+CMake configure step
+Generates native build instructions
+
+Build and run
+Compile the program and execute it
+
+
+cmake -S . -B build -G "MinGW Makefiles"
+
+## CMake — Initial Project Configuration
+
+- CMake is a build-system generator that describes how a project should be built.
+- `CMakeLists.txt` defines project configuration and build targets.
+- `project()` declares the project and its programming language.
+- `add_executable()` defines an executable target and its source files.
+- `CMAKE_CXX_STANDARD` requests a C++ language standard.
+- `target_compile_options()` applies compiler options to a specific target.
+- `cmake -S . -B build` configures the project using the current directory as the source and `build/` as the build directory.
+- `cmake --build build` builds the configured targets.
+- Generated build files belong in the build directory and should not be committed.
