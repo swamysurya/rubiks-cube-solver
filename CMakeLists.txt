@@ -73,6 +73,6 @@ enable_testing()
 
 
 add_test(
-    NAME CubeInitialization
+    NAME CubeTests
     COMMAND cube_tests
 )

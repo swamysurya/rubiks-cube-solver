@@ -473,3 +473,105 @@ git push
 5. Tests check expected behavior, not just whether code compiles.
 6. CTest runs registered tests and reports their results.
 7. Small, automated tests help prevent regressions as the project grows.
+
+
+ctest --test-dir build --output-on-failure
+
+### Testing Cube Invariants
+- An invariant is a property that should remain true for a valid state.
+- A solved cube has nine stickers of each of the six colors.
+- Tests can verify properties of the cube, not just individual function outputs.
+- Regression tests help detect when a code change breaks previously working behavior.
+- CTest provides a consistent command for running registered tests.
+
+Before coding the rotation, we need to understand how the 54 sticker positions change. This is one of the most important concepts in building a correct cube solver.
+Step 1 — Understand the F move
+Look directly at the Front face. A clockwise turn rotates its 3×3 grid clockwise by 90 degrees.
+Before
+1
+
+2
+
+3
+
+
+4
+
+5
+
+6
+
+
+7
+
+8
+
+9
+
+
+
+
+After clockwise turn
+7
+
+4
+
+1
+
+
+8
+
+5
+
+2
+
+
+9
+
+6
+
+3
+
+
+
+
+
+The numbers represent sticker positions, not actual colors. The center sticker stays in the center.
+
+For a clockwise rotation, the mapping is:
+Old position	New position
+Top-left	Top-right
+Top-middle	Middle-right
+Top-right	Bottom-right
+Middle-right	Bottom-middle
+Bottom-right	Bottom-left
+Bottom-middle	Middle-left
+Bottom-left	Top-left
+Middle-left	Top-middle
+Center	Center
+The four corners cycle among themselves, and the four edge positions cycle among themselves.
+Step 2 — Why the neighboring faces matter
+A real F move does more than rotate the Front face. It also cycles stickers along the bottom row of the Up face, the left column of the Right face, the top row of the Down face, and the right column of the Left face.
+Our implementation must update all these positions consistently.
+Important: the exact order of those neighboring stickers depends on our face orientation convention. We'll establish that mapping before writing the rotation code.
+
+Step 3 — Add the move to the class interface
+Open include/Cube.hpp. Inside the public: section of Cube, add:
+void rotateFrontClockwise();
+This function name is explicit and easy to understand. Later, we can add standard notation support so users can enter moves like F, F', and F2.
+
+### Rubik's Cube — Face Rotation Basics
+- A clockwise face turn rotates the face's 3x3 sticker grid by 90 degrees.
+- The center sticker remains in the center of that face.
+- Corner positions cycle among the four corners.
+- Edge positions cycle among the four edges.
+- A face turn also changes sticker positions on four neighboring faces.
+- Move implementations must preserve all 54 sticker positions and use a consistent face orientation convention.
+
+
+
+### Implementing a 3x3 Face Rotation
+- A clockwise rotation maps `(row, col)` to `(col, 2 - row)`.
+- Copying the old state prevents overwriting values needed later.
+- A helper function avoids duplicating the same face-rotation algorithm.
+- Rotating one face's stickers is only part of a complete Rubik's Cube move.

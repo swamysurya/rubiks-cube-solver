@@ -28,8 +28,14 @@ public:
     void print() const;
 
     Color getSticker(std::size_t index) const;
-    
+
     bool isSolved() const;  
+
+    // This function rotates the front face of the cube clockwise. It modifies the cube's state in place.
+    void rotateFrontClockwise();
+    void rotateFaceClockwise(std::size_t face);
+
+    bool hasSameState(const Cube& other) const;
 
 private:
     // Creates a fixed-size collection of 54 colors. It is not dynamically resized.

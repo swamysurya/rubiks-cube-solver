@@ -66,3 +66,51 @@ bool Cube::isSolved() const {
 
     return true;
 }
+
+void Cube::rotateFaceClockwise(std::size_t face) {
+    const std::size_t start = face * StickersPerFace;
+
+    const auto old = stickers;
+
+    for (std::size_t row = 0; row < 3; ++row) {
+        for (std::size_t col = 0; col < 3; ++col) {
+            const std::size_t oldIndex =
+                start + row * 3 + col;
+
+            const std::size_t newIndex =
+                start + col * 3 + (2 - row);
+
+            stickers[newIndex] = old[oldIndex];
+        }
+    }
+}
+
+void Cube::rotateFrontClockwise() {
+    // Save the original cube state before moving any stickers.
+    const auto old = stickers;
+    rotateFaceClockwise(2);
+    // Move the Up face's bottom row to the Right face's left column.
+    stickers[45] = old[6];
+    stickers[48] = old[7];
+    stickers[51] = old[8];
+
+    // Move the Right face's left column to the Down face's top row.
+    stickers[9]  = old[45];
+    stickers[10] = old[48];
+    stickers[11] = old[51];
+
+    // Move the Down face's top row to the Left face's right column.
+    stickers[38] = old[9];
+    stickers[41] = old[10];
+    stickers[44] = old[11];
+
+    // Move the Left face's right column to the Up face's bottom row.
+    stickers[6] = old[44];
+    stickers[7] = old[41];
+    stickers[8] = old[38];
+}
+
+
+bool Cube::hasSameState(const Cube& other) const {
+    return stickers == other.stickers;
+}
