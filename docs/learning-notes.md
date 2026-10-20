@@ -49,3 +49,17 @@ git ls-files
 ```powershell
 Get-ChildItem -Recurse -File
 ```
+
+### git commit msg formats
+
+<type>: <short description>
+
+Common types:
+Type	When to use	Example
+feat	New functionality	feat: add cube rotation logic
+fix	Bug fix	fix: correct cube move validation
+docs	Documentation changes	docs: add project requirements
+build	Build system changes	build: configure CMake
+test	Adding or updating tests	test: add cube initialization tests
+refactor	Restructure code without changing behavior	refactor: simplify cube state representation
+chore	Maintenance tasks	chore: add executable to gitignore
