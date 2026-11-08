@@ -283,6 +283,43 @@ assert(reverseCancelF == originalCube);
 ```
 - **Verifies**: Cancellation holds in reverse ($F' \cdot F = I$).
 
+### Test 25: Back Prime Alters State ($B' \ne I$) and Cancels Back ($B \cdot B' = I$)
+```cpp
+Cube testB;
+testB.rotateBackClockwise();
+testB.rotateBackCounterClockwise();
+assert(testB == originalCube);
+
+Cube onceTurnedBPrime;
+onceTurnedBPrime.rotateBackCounterClockwise();
+assert(onceTurnedBPrime != originalCube);
+```
+- **Verifies**:
+  - $B' \ne I$: Back prime move performs a real transformation.
+  - $B \cdot B' = I$: Applying a clockwise Back turn followed by its counter-clockwise turn returns the cube to solved state.
+
+### Test 26: Four Back Prime Turns Restore Original State ($(B')^4 = I$)
+```cpp
+Cube fourTurnBPrime;
+fourTurnBPrime.rotateBackCounterClockwise();
+fourTurnBPrime.rotateBackCounterClockwise();
+fourTurnBPrime.rotateBackCounterClockwise();
+fourTurnBPrime.rotateBackCounterClockwise();
+
+assert(fourTurnBPrime == originalCube);
+```
+- **Verifies**: Four consecutive $B'$ turns restore all stickers, confirming cyclic order 4.
+
+### Test 27: Reverse Cancellation Order ($B' \cdot B = I$)
+```cpp
+Cube reverseCancelB;
+reverseCancelB.rotateBackCounterClockwise();
+reverseCancelB.rotateBackClockwise();
+
+assert(reverseCancelB == originalCube);
+```
+- **Verifies**: Cancellation holds in reverse ($B' \cdot B = I$).
+
 ---
 
 ## 3. Running Tests with CTest
@@ -322,5 +359,8 @@ PASS: Reverse cancellation verified (D' * D = I).
 PASS: Front Prime (F') changes state and cancels F (F * F' = I).
 PASS: Four Front Prime turns restore every sticker position ((F')^4 = I).
 PASS: Reverse cancellation verified (F' * F = I).
+PASS: Back Prime (B') changes state and cancels B (B * B' = I).
+PASS: Four Back Prime turns restore every sticker position ((B')^4 = I).
+PASS: Reverse cancellation verified (B' * B = I).
 ```
 
