@@ -205,16 +205,19 @@ int main() {
   Cube onceTurnedDPrime;
   onceTurnedDPrime.rotateDownCounterClockwise();
   assert(onceTurnedDPrime != originalCube);
-  std::cout << "PASS: Down Prime (D') changes state and cancels D (D * D' = I).\n";
+  std::cout
+      << "PASS: Down Prime (D') changes state and cancels D (D * D' = I).\n";
 
-  // Test 20: Four consecutive Down Prime turns restore original state ((D')^4 = I)
+  // Test 20: Four consecutive Down Prime turns restore original state ((D')^4 =
+  // I)
   Cube fourTurnDPrime;
   fourTurnDPrime.rotateDownCounterClockwise();
   fourTurnDPrime.rotateDownCounterClockwise();
   fourTurnDPrime.rotateDownCounterClockwise();
   fourTurnDPrime.rotateDownCounterClockwise();
   assert(fourTurnDPrime == originalCube);
-  std::cout << "PASS: Four Down Prime turns restore every sticker position ((D')^4 = I).\n";
+  std::cout << "PASS: Four Down Prime turns restore every sticker position "
+               "((D')^4 = I).\n";
 
   // Test 21: Reverse cancellation order (D' * D = I)
   Cube reverseCancelD;
