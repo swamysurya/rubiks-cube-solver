@@ -196,5 +196,32 @@ int main() {
   assert(reverseCancelU == originalCube);
   std::cout << "PASS: Reverse cancellation verified (U' * U = I).\n";
 
+  // Test 19: Down Prime alters state (D' != I) and cancels Down (D * D' = I)
+  Cube testD;
+  testD.rotateDownClockwise();
+  testD.rotateDownCounterClockwise();
+  assert(testD == originalCube);
+
+  Cube onceTurnedDPrime;
+  onceTurnedDPrime.rotateDownCounterClockwise();
+  assert(onceTurnedDPrime != originalCube);
+  std::cout << "PASS: Down Prime (D') changes state and cancels D (D * D' = I).\n";
+
+  // Test 20: Four consecutive Down Prime turns restore original state ((D')^4 = I)
+  Cube fourTurnDPrime;
+  fourTurnDPrime.rotateDownCounterClockwise();
+  fourTurnDPrime.rotateDownCounterClockwise();
+  fourTurnDPrime.rotateDownCounterClockwise();
+  fourTurnDPrime.rotateDownCounterClockwise();
+  assert(fourTurnDPrime == originalCube);
+  std::cout << "PASS: Four Down Prime turns restore every sticker position ((D')^4 = I).\n";
+
+  // Test 21: Reverse cancellation order (D' * D = I)
+  Cube reverseCancelD;
+  reverseCancelD.rotateDownCounterClockwise();
+  reverseCancelD.rotateDownClockwise();
+  assert(reverseCancelD == originalCube);
+  std::cout << "PASS: Reverse cancellation verified (D' * D = I).\n";
+
   return 0;
 }

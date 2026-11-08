@@ -122,6 +122,9 @@ public:
   // Rotates the Up face (Face 0, White) counter-clockwise (U')
   void rotateUpCounterClockwise();
 
+  // Rotates the Down face (Face 1, Yellow) counter-clockwise (D')
+  void rotateDownCounterClockwise();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).

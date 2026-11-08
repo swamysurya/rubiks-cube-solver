@@ -209,6 +209,43 @@ assert(reverseCancelU == originalCube);
 ```
 - **Verifies**: Cancellation holds commutatively for inverse pairs ($U' \cdot U = I$).
 
+### Test 19: Down Prime Alters State ($D' \ne I$) and Cancels Down ($D \cdot D' = I$)
+```cpp
+Cube testD;
+testD.rotateDownClockwise();
+testD.rotateDownCounterClockwise();
+assert(testD == originalCube);
+
+Cube onceTurnedDPrime;
+onceTurnedDPrime.rotateDownCounterClockwise();
+assert(onceTurnedDPrime != originalCube);
+```
+- **Verifies**:
+  - $D' \ne I$: Down prime move performs a real transformation.
+  - $D \cdot D' = I$: Applying a clockwise Down turn followed by its counter-clockwise turn returns the cube to solved state.
+
+### Test 20: Four Down Prime Turns Restore Original State ($(D')^4 = I$)
+```cpp
+Cube fourTurnDPrime;
+fourTurnDPrime.rotateDownCounterClockwise();
+fourTurnDPrime.rotateDownCounterClockwise();
+fourTurnDPrime.rotateDownCounterClockwise();
+fourTurnDPrime.rotateDownCounterClockwise();
+
+assert(fourTurnDPrime == originalCube);
+```
+- **Verifies**: Four consecutive $D'$ turns restore all stickers, confirming cyclic order 4.
+
+### Test 21: Reverse Cancellation Order ($D' \cdot D = I$)
+```cpp
+Cube reverseCancelD;
+reverseCancelD.rotateDownCounterClockwise();
+reverseCancelD.rotateDownClockwise();
+
+assert(reverseCancelD == originalCube);
+```
+- **Verifies**: Cancellation holds in reverse ($D' \cdot D = I$).
+
 ---
 
 ## 3. Running Tests with CTest
@@ -242,15 +279,8 @@ PASS: Four Back turns restore every sticker position (verified with operator==).
 PASS: Up Prime (U') changes state and cancels U (U * U' = I).
 PASS: Four Up Prime turns restore every sticker position ((U')^4 = I).
 PASS: Reverse cancellation verified (U' * U = I).
-```
-PASS: Four Up turns restore every sticker position.
-PASS: One Right turn changes the cube state.
-PASS: Four Right turns restore every sticker position.
-PASS: One Left turn changes the cube state.
-PASS: Four Left turns restore every sticker position.
-PASS: One Down turn changes the cube state.
-PASS: Four Down turns restore every sticker position.
-PASS: One Back turn changes the cube state (verified with operator!=).
-PASS: Four Back turns restore every sticker position (verified with operator==).
+PASS: Down Prime (D') changes state and cancels D (D * D' = I).
+PASS: Four Down Prime turns restore every sticker position ((D')^4 = I).
+PASS: Reverse cancellation verified (D' * D = I).
 ```
 
