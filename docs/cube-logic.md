@@ -1,0 +1,165 @@
+# Rubik's Cube Code & Domain Logic — Learning Notes
+
+## 1. Architecture & Codebase Layout
+
+### The 5 Modular Layers
+```text
+ [ User / Command-Line Interface (main.cpp) ]
+                     │
+                     ▼
+ [ Notation & Scramble Layer (Notation.hpp / Scrambler.hpp) ]
+   - Parses inputs like "R U R' U'"
+   - Generates random 20-move scrambles
+                     │
+                     ▼
+ [ Core Cube Model (Cube.hpp / Cube.cpp) ]
+   - 54-sticker flat array representation
+   - Face turns (U, D, F, B, L, R and inverses)
+   - Solved-state detection (isSolved())
+                     ▲
+                     │ (queries state & branches moves)
+                     ▼
+ [ Solver Engine (Solver.hpp / Solver.cpp) ]
+   - Search Algorithms (BFS, IDDFS, or Two-Phase / Kociemba)
+   - Finds solution sequences to restore solved state
+```
+
+### Directory Responsibilities
+- `include/`: Header files (`.hpp`) containing types, constants, and function declarations. Separates *interface* from *implementation*.
+- `src/`: Source files (`.cpp`) implementing the classes and main program.
+- `tests/`: Automated unit tests verifying domain logic.
+- `docs/`: Technical specifications, design notes, and learning logs.
+- `build/`: Out-of-source compilation artifacts (git-ignored).
+
+---
+
+## 2. Cube Representation & Data Structures
+
+### Scoped Enumeration (`enum class Color`)
+```cpp
+enum class Color { White, Yellow, Red, Orange, Blue, Green };
+```
+- `enum class` provides strong type safety (cannot be implicitly converted to integers).
+
+### Fixed-Size Array (`std::array`)
+```cpp
+static constexpr std::size_t FaceCount = 6;
+static constexpr std::size_t StickersPerFace = 9;
+static constexpr std::size_t StickerCount = FaceCount * StickersPerFace; // 54
+
+std::array<Color, StickerCount> stickers;
+```
+- **Flat array advantage**: Cache-friendly, contiguous memory, fixed size, minimal copying overhead during high-speed tree search.
+
+### Face Ordering and Index Ranges
+| Face Index | Face Name | Notation | Default Color | Index Range |
+| :---: | :---: | :---: | :---: | :---: |
+| **0** | Up | **U** | White | 0 – 8 |
+| **1** | Down | **D** | Yellow | 9 – 17 |
+| **2** | Front | **F** | Red | 18 – 26 |
+| **3** | Back | **B** | Orange | 27 – 35 |
+| **4** | Left | **L** | Blue | 36 – 44 |
+| **5** | Right | **R** | Green | 45 – 53 |
+
+---
+
+## 3. Coordinate & Indexing Mathematics
+
+### 2D Unfolded Net View
+```text
+                     +------------+
+                     |  UP (0)    |
+                     |  0   1   2 |
+                     |  3   4   5 |
+                     |  6   7   8 |
+      +------------+ +------------+ +------------+ +------------+
+      |  LEFT (4)  | | FRONT (2)  | | RIGHT (5)  | |  BACK (3)  |
+      | 36  37  38 | | 18  19  20 | | 45  46  47 | | 27  28  29 |
+      | 39  40  41 | | 21  22  23 | | 48  49  50 | | 30  31  32 |
+      | 42  43  44 | | 24  25  26 | | 51  52  53 | | 33  34  35 |
+      +------------+ +------------+ +------------+ +------------+
+                     |  DOWN (1)  |
+                     |  9  10  11 |
+                     | 12  13  14 |
+                     | 15  16  17 |
+                     +------------+
+```
+
+### Formula for Sticker Indices
+For any given `face` ($0 \le \text{face} < 6$), `row` ($0 \le \text{row} < 3$), and `col` ($0 \le \text{col} < 3$):
+- **Local Face Offset**: $\text{localIndex} = \text{row} \times 3 + \text{col}$
+- **Global Index**: $\text{globalIndex} = (\text{face} \times 9) + (\text{row} \times 3) + \text{col}$
+
+---
+
+## 4. Cube Rotations — The Front Clockwise Move ($F$)
+
+A physical face rotation consists of **two distinct operations**:
+1. Rotating the 9 stickers on the face itself by $90^\circ$ clockwise.
+2. Cycling the 12 stickers on the adjacent rim faces.
+
+### Operation 1: 3×3 Face Grid Rotation
+Formula mapping clockwise: $(r, c) \to (c, 2 - r)$
+
+```text
+Old 3x3 Grid:       Rotated Clockwise:
+0  1  2             6  3  0
+3  4  5    ───>     7  4  1
+6  7  8             8  5  2
+```
+
+In code (`rotateFaceClockwise(std::size_t face)`):
+```cpp
+const std::size_t start = face * StickersPerFace;
+const auto old = stickers;
+
+for (std::size_t row = 0; row < 3; ++row) {
+    for (std::size_t col = 0; col < 3; ++col) {
+        const std::size_t oldIndex = start + row * 3 + col;
+        const std::size_t newIndex = start + col * 3 + (2 - row);
+        stickers[newIndex] = old[oldIndex];
+    }
+}
+```
+*Notice: The center sticker at offset 4 ($r=1, c=1$) maps to $(1, 2-1) = 4$, remaining stationary.*
+
+### Operation 2: Adjacent Rim Permutations for $F$ Turn
+When the Front face turns clockwise, the bordering rows/columns on adjacent faces shift in a 4-cycle:
+- **Up (`U`) bottom row** $\to$ **Right (`R`) left column**:
+  - `stickers[45] = old[6]`
+  - `stickers[48] = old[7]`
+  - `stickers[51] = old[8]`
+- **Right (`R`) left column** $\to$ **Down (`D`) top row**:
+  - `stickers[9]  = old[45]`
+  - `stickers[10] = old[48]`
+  - `stickers[11] = old[51]`
+- **Down (`D`) top row** $\to$ **Left (`L`) right column**:
+  - `stickers[38] = old[9]`
+  - `stickers[41] = old[10]`
+  - `stickers[44] = old[11]`
+- **Left (`L`) right column** $\to$ **Up (`U`) bottom row**:
+  - `stickers[6] = old[44]`
+  - `stickers[7] = old[41]`
+  - `stickers[8] = old[38]`
+
+---
+
+## 5. State Inspection and Helpers
+
+- **`getSticker(index)`**: Uses `stickers.at(index)` for safe bounds-checked access (`std::out_of_range`).
+- **`isSolved()`**: Verifies that each face $f \in [0, 5]$ has all 8 remaining stickers matching its first sticker:
+  ```cpp
+  bool Cube::isSolved() const {
+      for (std::size_t face = 0; face < FaceCount; ++face) {
+          const std::size_t start = face * StickersPerFace;
+          const Color faceColor = stickers[start];
+          for (std::size_t i = 1; i < StickersPerFace; ++i) {
+              if (stickers[start + i] != faceColor) return false;
+          }
+      }
+      return true;
+  }
+  ```
+- **`hasSameState(const Cube& other)`**: Compares arrays directly (`stickers == other.stickers`).
+- **`print()`**: Formats each face into a 3×3 grid using single characters (`W`, `Y`, `R`, `O`, `B`, `G`).
+
