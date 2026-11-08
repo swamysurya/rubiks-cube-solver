@@ -100,5 +100,24 @@ int main() {
   assert(fourTurnRight.hasSameState(originalCube));
   std::cout << "PASS: Four Right turns restore every sticker position.\n";
 
+  // =========================================================================
+  // 5. Left Turn (L) Tests
+  // =========================================================================
+
+  // Test 10: One Left turn alters the cube state (L != I)
+  Cube onceTurnedLeft;
+  onceTurnedLeft.rotateLeftClockwise();
+  assert(!onceTurnedLeft.hasSameState(originalCube));
+  std::cout << "PASS: One Left turn changes the cube state.\n";
+
+  // Test 11: Four consecutive Left turns restore the original state (L^4 = I)
+  Cube fourTurnLeft;
+  fourTurnLeft.rotateLeftClockwise();
+  fourTurnLeft.rotateLeftClockwise();
+  fourTurnLeft.rotateLeftClockwise();
+  fourTurnLeft.rotateLeftClockwise();
+  assert(fourTurnLeft.hasSameState(originalCube));
+  std::cout << "PASS: Four Left turns restore every sticker position.\n";
+
   return 0;
 }

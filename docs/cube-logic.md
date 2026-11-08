@@ -180,6 +180,25 @@ When looking at the Right face, turning it clockwise rotates columns on the 4 bo
   - `stickers[23] = old[14]`
   - `stickers[26] = old[17]`
 
+### Operation 5: Adjacent Rim Permutations for $L$ Turn (Left)
+When looking at the Left face, turning it clockwise shifts vertical columns on the 4 bordering faces:
+- **Up (`U`) left column** $\to$ **Front (`F`) left column**:
+  - `stickers[18] = old[0]`
+  - `stickers[21] = old[3]`
+  - `stickers[24] = old[6]`
+- **Front (`F`) left column** $\to$ **Down (`D`) left column**:
+  - `stickers[9]  = old[18]`
+  - `stickers[12] = old[21]`
+  - `stickers[15] = old[24]`
+- **Down (`D`) left column** $\to$ **Back (`B`) right column (inverted)**:
+  - `stickers[29] = old[15]`
+  - `stickers[32] = old[12]`
+  - `stickers[35] = old[9]`
+- **Back (`B`) right column** $\to$ **Up (`U`) left column (inverted)**:
+  - `stickers[0]  = old[35]`
+  - `stickers[3]  = old[32]`
+  - `stickers[6]  = old[29]`
+
 ---
 
 ## 5. State Inspection and Helpers
