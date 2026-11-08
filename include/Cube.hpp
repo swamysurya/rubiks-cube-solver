@@ -111,6 +111,16 @@ public:
   // -> Up (inverted).
   void rotateLeftClockwise();
 
+  // -------------------------------------------------------------------------
+  // 5. Counter-Clockwise (Prime) Rotations (90 degrees counter-clockwise)
+  // -------------------------------------------------------------------------
+  // In Rubik's Cube group theory, each face rotation X has order 4 (X^4 = Identity).
+  // The algebraic inverse X' (counter-clockwise) is equivalent to 3 clockwise turns:
+  // X' = X^3. Furthermore, X * X' = Identity (inverse cancellation).
+
+  // Rotates the Up face (Face 0, White) counter-clockwise (U')
+  void rotateUpCounterClockwise();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).

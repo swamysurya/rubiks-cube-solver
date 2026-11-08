@@ -161,5 +161,36 @@ int main() {
   std::cout << "PASS: Four Back turns restore every sticker position (verified "
                "with operator==).\n";
 
+  // =========================================================================
+  // 8. Counter-Clockwise (Prime) Rotations: Up Prime (U') Tests
+  // =========================================================================
+
+  // Test 16: Up Prime alters state (U' != I) and cancels Up (U * U' = I)
+  Cube testU;
+  testU.rotateUpClockwise();
+  testU.rotateUpCounterClockwise();
+  assert(testU == originalCube);
+
+  Cube onceTurnedUPrime;
+  onceTurnedUPrime.rotateUpCounterClockwise();
+  assert(onceTurnedUPrime != originalCube);
+  std::cout << "PASS: Up Prime (U') changes state and cancels U (U * U' = I).\n";
+
+  // Test 17: Four consecutive Up Prime turns restore original state ((U')^4 = I)
+  Cube fourTurnUPrime;
+  fourTurnUPrime.rotateUpCounterClockwise();
+  fourTurnUPrime.rotateUpCounterClockwise();
+  fourTurnUPrime.rotateUpCounterClockwise();
+  fourTurnUPrime.rotateUpCounterClockwise();
+  assert(fourTurnUPrime == originalCube);
+  std::cout << "PASS: Four Up Prime turns restore every sticker position ((U')^4 = I).\n";
+
+  // Test 18: Reverse cancellation order (U' * U = I)
+  Cube reverseCancelU;
+  reverseCancelU.rotateUpCounterClockwise();
+  reverseCancelU.rotateUpClockwise();
+  assert(reverseCancelU == originalCube);
+  std::cout << "PASS: Reverse cancellation verified (U' * U = I).\n";
+
   return 0;
 }

@@ -261,3 +261,39 @@ When looking at the Back face, turning it clockwise shifts bordering rows/column
 - **`hasSameState(const Cube& other)`**: Compares arrays directly (`stickers == other.stickers`).
 - **`print()`**: Formats each face into a 3×3 grid using single characters (`W`, `Y`, `R`, `O`, `B`, `G`).
 
+---
+
+## 6. Counter-Clockwise (Prime) Rotations & Group Inverses
+
+### The Group Theory Inverse Property
+In the Rubik's Cube rotation group, every 90° face rotation $X \in \{U, D, F, B, L, R\}$ is an element of order 4:
+$$X^4 = I \quad (\text{Identity State})$$
+
+Multiplying both sides by the group inverse $X^{-1}$ (denoted as $X'$ or "X-prime" in WCA notation):
+$$X^{-1} \cdot X^4 = X^{-1} \cdot I$$
+$$X^3 = X'$$
+
+Thus:
+$$\mathbf{X' = X^3}$$
+
+### DRY Engineering Principle (Don't Repeat Yourself)
+Instead of hand-coding another set of complex coordinate transformations in reverse order (which risks index typos and duplicates code), we implement each counter-clockwise turn by calling its clockwise counterpart 3 times:
+
+```cpp
+void Cube::rotateUpCounterClockwise() {
+  rotateUpClockwise();
+  rotateUpClockwise();
+  rotateUpClockwise();
+}
+```
+
+### Mathematical Invariants & Cancellation
+Prime turns satisfy two foundational invariants:
+1. **Inverse Cancellation**:
+   $$X \cdot X' = I \quad \text{and} \quad X' \cdot X = I$$
+   Executing a face move followed by its inverse returns the cube strictly to its previous state.
+2. **Order 4 Invariant**:
+   $$(X')^4 = I$$
+   Four consecutive counter-clockwise turns restore the original state.
+
+

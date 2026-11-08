@@ -277,6 +277,21 @@ void Cube::rotateBackClockwise() {
   stickers[53] = old[15];
 }
 
+// =============================================================================
+// 4. Counter-Clockwise (Prime) Rotations (Group Inverses: X' = X^3)
+// =============================================================================
+// By the cyclic group property of 90-degree rotations:
+//   X^4 = I  =>  X * X^3 = I  =>  X' = X^3
+// Implementing prime moves via 3 clockwise rotations adheres to the DRY principle
+// (Don't Repeat Yourself), eliminates duplicate coordinate math, and guarantees
+// complete mathematical consistency.
+
+void Cube::rotateUpCounterClockwise() {
+  rotateUpClockwise();
+  rotateUpClockwise();
+  rotateUpClockwise();
+}
+
 void Cube::rotateFaceClockwise(std::size_t face) {
   const std::size_t start = face * StickersPerFace;
   const auto old = stickers;
