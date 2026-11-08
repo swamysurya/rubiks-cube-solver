@@ -111,6 +111,32 @@ public:
   // -> Up (inverted).
   void rotateLeftClockwise();
 
+  // -------------------------------------------------------------------------
+  // 5. Counter-Clockwise (Prime) Rotations (90 degrees counter-clockwise)
+  // -------------------------------------------------------------------------
+  // In group theory, every Rubik's Cube face turn has order 4: X^4 = Identity.
+  // Hence, the inverse operation (counter-clockwise / prime turn X') equals
+  // three clockwise turns: X' = X^3.
+  // Additionally, X * X' = Identity (they cancel each other out).
+
+  // Rotates the Up face (Face 0, White) counter-clockwise (U')
+  void rotateUpCounterClockwise();
+
+  // Rotates the Down face (Face 1, Yellow) counter-clockwise (D')
+  void rotateDownCounterClockwise();
+
+  // Rotates the Front face (Face 2, Red) counter-clockwise (F')
+  void rotateFrontCounterClockwise();
+
+  // Rotates the Back face (Face 3, Orange) counter-clockwise (B')
+  void rotateBackCounterClockwise();
+
+  // Rotates the Right face (Face 5, Green) counter-clockwise (R')
+  void rotateRightCounterClockwise();
+
+  // Rotates the Left face (Face 4, Blue) counter-clockwise (L')
+  void rotateLeftCounterClockwise();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).
@@ -118,7 +144,7 @@ public:
 
 private:
   // -------------------------------------------------------------------------
-  // 5. Private Internal State
+  // 6. Private Internal State
   // -------------------------------------------------------------------------
   // Flat, fixed-size collection of exactly 54 sticker colors.
   // - Fixed compile-time size: Zero dynamic heap allocation, zero memory leaks.
