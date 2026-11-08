@@ -58,6 +58,11 @@ public:
   // Returns true if every face has all 9 stickers sharing the exact same color.
   bool isSolved() const;
 
+  // C++20 Defaulted Equality Operator:
+  // Automatically generates member-wise equality (stickers == other.stickers)
+  // and automatically synthesizes operator!= for free.
+  bool operator==(const Cube &other) const = default;
+
   // Compares this cube's 54 stickers with another cube's 54 stickers.
   // Returns true if every single sticker has an identical color at the same
   // index.
@@ -82,13 +87,19 @@ public:
   void rotateUpClockwise();
 
   // Rotates the Down face (Face 1, Yellow) clockwise by 90 degrees.
-  // Also shifts the bottom rows (row 2) of the 4 adjacent faces: Left -> Back -> Right -> Front -> Left.
+  // Also shifts the bottom rows (row 2) of the 4 adjacent faces: Left -> Back
+  // -> Right -> Front -> Left.
   void rotateDownClockwise();
 
   // Rotates the Front face (Face 2, Red) clockwise by 90 degrees.
   // Also shifts the adjacent border stickers across Up, Right, Down, and Left
   // faces.
   void rotateFrontClockwise();
+
+  // Rotates the Back face (Face 3, Orange) clockwise by 90 degrees.
+  // Also shifts the bordering rows/columns: Right -> Up (inverted) -> Left ->
+  // Down (inverted) -> Right.
+  void rotateBackClockwise();
 
   // Rotates the Right face (Face 5, Green) clockwise by 90 degrees.
   // Also shifts the bordering columns: Front -> Up -> Back (inverted) -> Down

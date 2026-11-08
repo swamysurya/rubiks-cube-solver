@@ -151,6 +151,27 @@ assert(fourTurnDown.hasSameState(originalCube));
 ```
 - **Verifies**: Repeating the Down rotation 4 times restores all stickers to their original positions.
 
+### Test 14: One Back Turn Changes State ($B \ne I$, tested with `operator!=`)
+```cpp
+Cube onceTurnedBack;
+onceTurnedBack.rotateBackClockwise();
+
+assert(onceTurnedBack != originalCube);
+```
+- **Verifies**: A Back face rotation alters the cube state and proves C++20 `operator!=` correctly identifies state divergence.
+
+### Test 15: Four Back Turns Restore the Cube ($B^4 = I$, tested with `operator==`)
+```cpp
+Cube fourTurnBack;
+fourTurnBack.rotateBackClockwise();
+fourTurnBack.rotateBackClockwise();
+fourTurnBack.rotateBackClockwise();
+fourTurnBack.rotateBackClockwise();
+
+assert(fourTurnBack == originalCube);
+```
+- **Verifies**: Repeating the Back rotation 4 times restores all stickers, and C++20 `operator==` confirms equality.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -179,5 +200,7 @@ PASS: One Left turn changes the cube state.
 PASS: Four Left turns restore every sticker position.
 PASS: One Down turn changes the cube state.
 PASS: Four Down turns restore every sticker position.
+PASS: One Back turn changes the cube state (verified with operator!=).
+PASS: Four Back turns restore every sticker position (verified with operator==).
 ```
 

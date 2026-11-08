@@ -218,10 +218,32 @@ When looking at the Down face, turning it clockwise shifts the bottom row (row 2
   - `stickers[43] = old[25]`
   - `stickers[44] = old[26]`
 
+### Operation 7: Adjacent Rim Permutations for $B$ Turn (Back)
+When looking at the Back face, turning it clockwise shifts bordering rows/columns across 4 faces:
+- **Right (`R`) right column** $\to$ **Up (`U`) top row**:
+  - `stickers[0] = old[47]`
+  - `stickers[1] = old[50]`
+  - `stickers[2] = old[53]`
+- **Up (`U`) top row** $\to$ **Left (`L`) left column (inverted)**:
+  - `stickers[36] = old[2]`
+  - `stickers[39] = old[1]`
+  - `stickers[42] = old[0]`
+- **Left (`L`) left column** $\to$ **Down (`D`) bottom row**:
+  - `stickers[15] = old[36]`
+  - `stickers[16] = old[39]`
+  - `stickers[17] = old[42]`
+- **Down (`D`) bottom row** $\to$ **Right (`R`) right column (inverted)**:
+  - `stickers[47] = old[17]`
+  - `stickers[50] = old[16]`
+  - `stickers[53] = old[15]`
+
 ---
 
 ## 5. State Inspection and Helpers
 
+- **`bool operator==(const Cube& other) const = default;` (C++20)**:
+  - Defaulted equality comparison. Compares all 54 stickers member-wise.
+  - Automatically generates `operator!=` for free.
 - **`getSticker(index)`**: Uses `stickers.at(index)` for safe bounds-checked access (`std::out_of_range`).
 - **`isSolved()`**: Verifies that each face $f \in [0, 5]$ has all 8 remaining stickers matching its first sticker:
   ```cpp

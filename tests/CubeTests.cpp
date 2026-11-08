@@ -138,5 +138,28 @@ int main() {
   assert(fourTurnDown.hasSameState(originalCube));
   std::cout << "PASS: Four Down turns restore every sticker position.\n";
 
+  // =========================================================================
+  // 7. Back Turn (B) Tests & C++20 operator== / operator!=
+  // =========================================================================
+
+  // Test 14: One Back turn alters the cube state (B != I) using C++20
+  // operator!=
+  Cube onceTurnedBack;
+  onceTurnedBack.rotateBackClockwise();
+  assert(onceTurnedBack != originalCube);
+  std::cout << "PASS: One Back turn changes the cube state (verified with "
+               "operator!=).\n";
+
+  // Test 15: Four consecutive Back turns restore the original state (B^4 = I)
+  // using operator==
+  Cube fourTurnBack;
+  fourTurnBack.rotateBackClockwise();
+  fourTurnBack.rotateBackClockwise();
+  fourTurnBack.rotateBackClockwise();
+  fourTurnBack.rotateBackClockwise();
+  assert(fourTurnBack == originalCube);
+  std::cout << "PASS: Four Back turns restore every sticker position (verified "
+               "with operator==).\n";
+
   return 0;
 }
