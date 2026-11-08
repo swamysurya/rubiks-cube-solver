@@ -114,9 +114,10 @@ public:
   // -------------------------------------------------------------------------
   // 5. Counter-Clockwise (Prime) Rotations (90 degrees counter-clockwise)
   // -------------------------------------------------------------------------
-  // In Rubik's Cube group theory, each face rotation X has order 4 (X^4 = Identity).
-  // The algebraic inverse X' (counter-clockwise) is equivalent to 3 clockwise turns:
-  // X' = X^3. Furthermore, X * X' = Identity (inverse cancellation).
+  // In Rubik's Cube group theory, each face rotation X has order 4 (X^4 =
+  // Identity). The algebraic inverse X' (counter-clockwise) is equivalent to 3
+  // clockwise turns: X' = X^3. Furthermore, X * X' = Identity (inverse
+  // cancellation).
 
   // Rotates the Up face (Face 0, White) counter-clockwise (U')
   void rotateUpCounterClockwise();

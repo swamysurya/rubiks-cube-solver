@@ -282,9 +282,9 @@ void Cube::rotateBackClockwise() {
 // =============================================================================
 // By the cyclic group property of 90-degree rotations:
 //   X^4 = I  =>  X * X^3 = I  =>  X' = X^3
-// Implementing prime moves via 3 clockwise rotations adheres to the DRY principle
-// (Don't Repeat Yourself), eliminates duplicate coordinate math, and guarantees
-// complete mathematical consistency.
+// Implementing prime moves via 3 clockwise rotations adheres to the DRY
+// principle (Don't Repeat Yourself), eliminates duplicate coordinate math, and
+// guarantees complete mathematical consistency.
 
 void Cube::rotateUpCounterClockwise() {
   rotateUpClockwise();
