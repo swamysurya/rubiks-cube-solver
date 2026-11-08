@@ -238,7 +238,8 @@ int main() {
   std::cout
       << "PASS: Front Prime (F') changes state and cancels F (F * F' = I).\n";
 
-  // Test 23: Four consecutive Front Prime turns restore original state ((F')^4 = I)
+  // Test 23: Four consecutive Front Prime turns restore original state ((F')^4
+  // = I)
   Cube fourTurnFPrime;
   fourTurnFPrime.rotateFrontCounterClockwise();
   fourTurnFPrime.rotateFrontCounterClockwise();
