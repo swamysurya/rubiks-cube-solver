@@ -296,4 +296,112 @@ Prime turns satisfy two foundational invariants:
    $$(X')^4 = I$$
    Four consecutive counter-clockwise turns restore the original state.
 
+---
+
+## 7. Deep-Dive: Identity State ($I$), WCA Notation, and Inverse Cancellation
+
+### 7.1 What is the Identity State ($I$)?
+In mathematics and abstract algebra, an **identity element** is an entity or operation that leaves other elements completely unchanged:
+* **Arithmetic Addition**: $0$ is the additive identity ($5 + 0 = 5$).
+* **Arithmetic Multiplication**: $1$ is the multiplicative identity ($5 \times 1 = 5$).
+* **Rubik's Cube Model**:
+  1. **As an Action / Move**: $I$ is the "null operation" or $0^\circ$ turn. Applying $I$ to any cube leaves every sticker unchanged.
+  2. **As a Geometric State**: $I$ represents the pristine **solved cube** state. Every sticker resides on its home face with uniform color (Up=White, Down=Yellow, Front=Red, Back=Orange, Left=Blue, Right=Green).
+
+In our C++ implementation:
+```cpp
+const Cube originalCube; // Instantiated in solved state -> Represents the Identity State (I)
+```
+Any sequence of moves that returns the cube to this exact configuration evaluates to `true` under `cube == originalCube`.
+
+---
+
+### 7.2 What is WCA Notation?
+**WCA** stands for the **World Cube Association** — the international governing body for Rubik's Cube speedcubing competitions and official world records.
+
+In 1978, British mathematician David Singmaster created the standard letter-based notation to describe rotations, which was codified by the WCA.
+
+#### The 6 Face Letters
+All rotations are defined from the perspective of looking directly at the face:
+| Symbol | Face Name | Spatial Orientation | Default Color | Clockwise Rotation ($90^\circ$) |
+| :---: | :---: | :---: | :---: | :--- |
+| **`U`** | **Up** | Top face | White | Rotate top face clockwise |
+| **`D`** | **Down** | Bottom face | Yellow | Rotate bottom face clockwise |
+| **`F`** | **Front** | Facing the user | Red | Rotate front face clockwise |
+| **`B`** | **Back** | Away from user | Orange | Rotate back face clockwise |
+| **`L`** | **Left** | Left side | Blue | Rotate left face clockwise |
+| **`R`** | **Right** | Right side | Green | Rotate right face clockwise |
+
+#### Move Modifiers
+Each of the 6 letters can take one of three forms:
+1. **Plain Letter (`U`, `R`, `F`)**:
+   - Turn that face **$90^\circ$ clockwise**.
+2. **Letter with Apostrophe / Prime (`U'`, `R'`, `F'`)**:
+   - Pronounced *"U-prime"*, *"R-prime"*, etc.
+   - Turn that face **$90^\circ$ counter-clockwise** (the exact inverse of the clockwise turn).
+3. **Letter with the Number 2 (`U2`, `R2`, `F2`)**:
+   - Pronounced *"U-two"*, *"R-two"*, etc.
+   - Turn that face **$180^\circ$ (a double / half turn)**.
+
+#### Common WCA Algorithms Example
+In speedcubing, algorithms are written as space-separated strings of WCA moves:
+* `"R U R' U'"`: The fundamental 4-move "sexy move" (triggers corner-edge insertions).
+* `"F R U R' U' F'"`: Common OLL (Orientation of the Last Layer) algorithm.
+
+---
+
+### 7.3 How Does $X \cdot X' = I$? (Proof & Intuition)
+In group notation, the operator $\cdot$ denotes **sequential composition** ("operation $A$ followed by operation $B$").
+
+Let $X$ represent any arbitrary face rotation ($U, D, F, B, L, R$).
+
+#### A. Physical Intuition: The Dial / Door Knob Analogy
+Imagine a rotary dial or door knob:
+1. Rotate it $+90^\circ$ clockwise ($X$).
+2. Rotate it $-90^\circ$ counter-clockwise ($X'$).
+3. **Result**: The dial is back in its starting orientation. Net displacement = **Zero ($I$)**.
+
+#### B. Permutation Tracking Proof
+A face move is a bijection (one-to-one mapping) that permutes the positions of stickers:
+* Let $X$ move a sticker from index $A$ to index $B$:
+  $$X: A \longmapsto B$$
+* The prime move $X'$ is by definition the inverse permutation that undoes $X$:
+  $$X': B \longmapsto A$$
+* Applying $X$ followed by $X'$ ($X \cdot X'$):
+  $$(X \cdot X'): A \xrightarrow{\quad X \quad} B \xrightarrow{\quad X' \quad} A$$
+Every single sticker returns to its initial index. Because no sticker has changed position:
+$$\mathbf{X \cdot X' = I}$$
+
+#### C. Algebraic Proof in Finite Cyclic Groups
+Every face rotation on a square face has a cyclic order of 4 because $90^\circ \times 4 = 360^\circ \equiv 0^\circ$:
+$$X^4 = I$$
+
+Splitting $X^4$ into its composite factors:
+$$X \cdot X^3 = I$$
+
+By definition of the group inverse, the unique element that multiplies with $X$ to yield the identity $I$ is $X^{-1}$ (denoted as $X'$):
+$$X \cdot X' = I \implies \mathbf{X' = X^3}$$
+
+#### D. Commutative Cancellation Property
+Because $X$ and $X'$ commute within their own generated cyclic subgroup:
+$$\mathbf{X \cdot X' = X' \cdot X = I}$$
+Whether you turn clockwise first then counter-clockwise, or counter-clockwise first then clockwise, the cube state returns strictly to identity.
+
+#### E. Code Verification in Unit Tests
+In [`tests/CubeTests.cpp`](../tests/CubeTests.cpp):
+```cpp
+// 1. Forward cancellation: X * X' = I
+Cube testU;
+testU.rotateUpClockwise();        // X
+testU.rotateUpCounterClockwise(); // X'
+assert(testU == originalCube);    // Returns true!
+
+// 2. Reverse cancellation: X' * X = I
+Cube reverseCancelU;
+reverseCancelU.rotateUpCounterClockwise(); // X'
+reverseCancelU.rotateUpClockwise();        // X
+assert(reverseCancelU == originalCube);    // Returns true!
+```
+
+
 

@@ -27,5 +27,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - 5-layer software architecture diagram
    - 54-sticker flat array representation (`std::array<Color, 54>`)
    - Unfolded 2D net diagram and global index formula: `face * 9 + row * 3 + col`
-   - Face rotation matrix formula $(r, c) \to (c, 2 - r)$ and adjacent rim permutations for the Front ($F$) move
-   - Inspection methods (`isSolved()`, `.at()` bounds safety, `print()`)
+   - Face rotation matrix formula $(r, c) \to (c, 2 - r)$ and adjacent rim permutations for all 6 faces ($F, U, R, L, D, B$)
+   - Inspection methods (`isSolved()`, `.at()` bounds safety, `print()`, C++20 `operator==`)
+   - Counter-clockwise (prime) turns via the DRY principle ($X' = X^3$)
+   - Deep-dive into Identity state ($I$), official WCA move notation, and group cancellation proofs ($X \cdot X' = I$)
