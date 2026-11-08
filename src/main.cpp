@@ -2,7 +2,10 @@
 #include <iostream>
 
 int main() {
-    Cube cube;
-     std::cout << "Cube solved: " << std::boolalpha << cube.isSolved() << '\n';
-    return 0;
+  Cube cube;
+  std::cout << "Cube solved: " << std::boolalpha << cube.isSolved() << '\n';
+
+  std::cout << "=== Initial Cube State ===\n";
+  cube.print();
+  return 0;
 }
