@@ -67,6 +67,27 @@ assert(!onceTurnedCube.hasSameState(originalCube));
 ```
 - **Verifies**: A single move actually alters the cube state and is not a no-op.
 
+### Test 6: One Up Turn Changes State ($U \ne I$)
+```cpp
+Cube onceTurnedUp;
+onceTurnedUp.rotateUpClockwise();
+
+assert(!onceTurnedUp.hasSameState(originalCube));
+```
+- **Verifies**: An Up face rotation changes the cube state and shifts the top rows.
+
+### Test 7: Four Up Turns Restore the Cube ($U^4 = I$)
+```cpp
+Cube fourTurnUp;
+fourTurnUp.rotateUpClockwise();
+fourTurnUp.rotateUpClockwise();
+fourTurnUp.rotateUpClockwise();
+fourTurnUp.rotateUpClockwise();
+
+assert(fourTurnUp.hasSameState(originalCube));
+```
+- **Verifies**: Repeating the Up rotation 4 times restores all stickers to their original positions.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -85,7 +106,9 @@ Expected output:
 PASS: A newly created cube is solved.
 PASS: Every face has a uniform color.
 PASS: Each face color appears nine times.
-PASS: Four Front turns restore every sticker position.
 PASS: One Front turn changes the cube state.
+PASS: Four Front turns restore every sticker position.
+PASS: One Up turn changes the cube state.
+PASS: Four Up turns restore every sticker position.
 ```
 

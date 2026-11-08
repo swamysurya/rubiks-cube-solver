@@ -123,7 +123,7 @@ for (std::size_t row = 0; row < 3; ++row) {
 ```
 *Notice: The center sticker at offset 4 ($r=1, c=1$) maps to $(1, 2-1) = 4$, remaining stationary.*
 
-### Operation 2: Adjacent Rim Permutations for $F$ Turn
+### Operation 2: Adjacent Rim Permutations for $F$ Turn (Front)
 When the Front face turns clockwise, the bordering rows/columns on adjacent faces shift in a 4-cycle:
 - **Up (`U`) bottom row** $\to$ **Right (`R`) left column**:
   - `stickers[45] = old[6]`
@@ -141,6 +141,25 @@ When the Front face turns clockwise, the bordering rows/columns on adjacent face
   - `stickers[6] = old[44]`
   - `stickers[7] = old[41]`
   - `stickers[8] = old[38]`
+
+### Operation 3: Adjacent Rim Permutations for $U$ Turn (Up)
+When looking down at the Up face, a clockwise turn shifts the top row (row 0) across all 4 surrounding faces in order:
+- **Front (`F`) top row** $\to$ **Left (`L`) top row**:
+  - `stickers[36] = old[18]`
+  - `stickers[37] = old[19]`
+  - `stickers[38] = old[20]`
+- **Left (`L`) top row** $\to$ **Back (`B`) top row**:
+  - `stickers[27] = old[36]`
+  - `stickers[28] = old[37]`
+  - `stickers[29] = old[38]`
+- **Back (`B`) top row** $\to$ **Right (`R`) top row**:
+  - `stickers[45] = old[27]`
+  - `stickers[46] = old[28]`
+  - `stickers[47] = old[29]`
+- **Right (`R`) top row** $\to$ **Front (`F`) top row**:
+  - `stickers[18] = old[45]`
+  - `stickers[19] = old[46]`
+  - `stickers[20] = old[47]`
 
 ---
 

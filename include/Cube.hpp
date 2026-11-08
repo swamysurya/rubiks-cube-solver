@@ -1,43 +1,107 @@
-
-// These prevent the header from being included multiple times in a way that
-// causes duplicate declarations in the same translation unit.
+// Header guards prevent this header file from being included multiple times in
+// the same translation unit, which would cause duplicate declaration compiler
+// errors.
 #ifndef CUBE_HPP
 #define CUBE_HPP
 
 #include <array>
 #include <cstddef>
 
-enum class Color { White, Yellow, Red, Orange, Blue, Green };
+// =============================================================================
+// Scoped Enumeration: Color
+// =============================================================================
+// Using 'enum class' provides strong type safety:
+// - Colors cannot be implicitly converted to or compared with integers.
+// - Each color corresponds to one of the six physical faces in a solved cube.
+enum class Color {
+  White,  // Face 0: Up (U)
+  Yellow, // Face 1: Down (D)
+  Red,    // Face 2: Front (F)
+  Orange, // Face 3: Back (B)
+  Blue,   // Face 4: Left (L)
+  Green   // Face 5: Right (R)
+};
 
+// =============================================================================
+// Class: Cube
+// =============================================================================
+// Represents a standard 3x3x3 Rubik's Cube.
+// Encapsulates all 54 sticker states and provides methods to inspect, display,
+// and rotate faces.
 class Cube {
 public:
-  // std::size_t is an unsigned integer type commonly used for sizes and
-  // indexing.
+  // -------------------------------------------------------------------------
+  // 1. Compile-Time Constants
+  // -------------------------------------------------------------------------
+  // - FaceCount: A cube has exactly 6 faces.
+  // - StickersPerFace: Each 3x3 face contains 9 stickers.
+  // - StickerCount: 6 faces * 9 stickers = 54 total stickers.
+  // - 'static constexpr' evaluates values at compile time across all Cube
+  // instances.
+  // - 'std::size_t' is an unsigned integer guaranteed to hold valid array sizes
+  // and indices.
   static constexpr std::size_t FaceCount = 6;
   static constexpr std::size_t StickersPerFace = 9;
   static constexpr std::size_t StickerCount = FaceCount * StickersPerFace;
 
+  // -------------------------------------------------------------------------
+  // 2. Constructors
+  // -------------------------------------------------------------------------
+  // Initializes the cube in a standard solved state where all 9 stickers
+  // on each face have that face's uniform color.
   Cube();
 
-  void print() const;
-
-  Color getSticker(std::size_t index) const;
-
+  // -------------------------------------------------------------------------
+  // 3. State Queries & Inspection (const methods - do not modify state)
+  // -------------------------------------------------------------------------
+  // Checks whether the cube is currently in a solved state.
+  // Returns true if every face has all 9 stickers sharing the exact same color.
   bool isSolved() const;
 
-  // This function rotates the front face of the cube clockwise. It modifies the
-  // cube's state in place.
-  void rotateFrontClockwise();
-  // This functrotates the face specified by the given face index clockwise. It
-  // modifies the cube's state in place.ion
-  void rotateFaceClockwise(std::size_t face);
-
+  // Compares this cube's 54 stickers with another cube's 54 stickers.
+  // Returns true if every single sticker has an identical color at the same
+  // index.
   bool hasSameState(const Cube &other) const;
 
+  // Returns the color of the sticker at the specified 0-based global index (0
+  // to 53). Uses bounds checking (.at()) to prevent reading outside array
+  // limits.
+  Color getSticker(std::size_t index) const;
+
+  // Prints all 6 faces to stdout as formatted 3x3 character grids (W, Y, R, O,
+  // B, G).
+  void print() const;
+
+  // -------------------------------------------------------------------------
+  // 4. Cube Rotations & Manipulations (mutating methods - modify state in
+  // place)
+  // -------------------------------------------------------------------------
+  // Rotates the Up face (Face 0, White) clockwise by 90 degrees.
+  // Also shifts the top rows (row 0) of the 4 adjacent faces: Front -> Left ->
+  // Back -> Right -> Front.
+  void rotateUpClockwise();
+
+  // Rotates the Front face (Face 2, Red) clockwise by 90 degrees.
+  // Also shifts the adjacent border stickers across Up, Right, Down, and Left
+  // faces.
+  void rotateFrontClockwise();
+
+  // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
+  // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
+  // (col, 2 - row).
+  void rotateFaceClockwise(std::size_t face);
+
 private:
-  // Creates a fixed-size collection of 54 colors. It is not dynamically
-  // resized.
+  // -------------------------------------------------------------------------
+  // 5. Private Internal State
+  // -------------------------------------------------------------------------
+  // Flat, fixed-size collection of exactly 54 sticker colors.
+  // - Fixed compile-time size: Zero dynamic heap allocation, zero memory leaks.
+  // - Contiguous memory layout: Cache-friendly and fast to copy during solver
+  // search.
+  // - Encapsulated in 'private': Callers cannot arbitrarily alter sticker
+  // colors directly.
   std::array<Color, StickerCount> stickers;
 };
 
-#endif
+#endif // CUBE_HPP

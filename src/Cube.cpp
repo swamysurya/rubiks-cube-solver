@@ -1,18 +1,20 @@
-
 #include "Cube.hpp"
 #include <iostream>
 
-// The Cube:: prefix means this constructor belongs to the Cube class.
+// =============================================================================
+// 1. Constructor
+// =============================================================================
 Cube::Cube() {
   const std::array<Color, FaceCount> faceColors = {
-      Color::White,  // Up
-      Color::Yellow, // Down
-      Color::Red,    // Front
-      Color::Orange, // Back
-      Color::Blue,   // Left
-      Color::Green   // Right
+      Color::White,  // Face 0: Up
+      Color::Yellow, // Face 1: Down
+      Color::Red,    // Face 2: Front
+      Color::Orange, // Face 3: Back
+      Color::Blue,   // Face 4: Left
+      Color::Green   // Face 5: Right
   };
-  // Initialize each sticker to the color of its face.
+
+  // Initialize each of the 54 stickers to its respective face color.
   for (std::size_t face = 0; face < FaceCount; ++face) {
     for (std::size_t sticker = 0; sticker < StickersPerFace; ++sticker) {
       stickers[face * StickersPerFace + sticker] = faceColors[face];
@@ -20,6 +22,47 @@ Cube::Cube() {
   }
 }
 
+// =============================================================================
+// 2. State Queries & Inspection (const methods)
+// =============================================================================
+/*
+The isSolved() method determines if the Rubik's Cube is in a solved state
+logic : iterate through each face of the cube and check if all the stickers on
+that face are of the same color
+*/
+bool Cube::isSolved() const {
+  for (std::size_t face = 0; face < FaceCount; ++face) {
+    const std::size_t start = face * StickersPerFace;
+    const Color faceColor = stickers[start];
+
+    for (std::size_t i = 1; i < StickersPerFace; ++i) {
+      if (stickers[start + i] != faceColor) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+/*
+The hasSameState() method compares the state of the current cube with another
+cube
+logic : compare the sticker array of the current cube with the sticker array
+of the other cube
+*/
+bool Cube::hasSameState(const Cube &other) const {
+  return stickers == other.stickers;
+}
+
+/*
+The getSticker() method returns the color of the sticker at the given index
+logic : return the sticker at the given index
+*/
+Color Cube::getSticker(std::size_t index) const { return stickers.at(index); }
+
+/*
+The print() method prints the current state of the cube
+logic : iterate through each face of the cube and print the stickers
+*/
 void Cube::print() const {
   for (std::size_t face = 0; face < FaceCount; ++face) {
     std::cout << "Face " << face << ":\n";
@@ -56,64 +99,78 @@ void Cube::print() const {
   }
 }
 
-Color Cube::getSticker(std::size_t index) const { return stickers.at(index); }
+// =============================================================================
+// 3. Cube Rotations & Manipulations (mutating methods)
+// =============================================================================
 
-bool Cube::isSolved() const {
-  for (std::size_t face = 0; face < FaceCount; ++face) {
-    const std::size_t start = face * StickersPerFace;
-    const Color faceColor = stickers[start];
-
-    for (std::size_t i = 1; i < StickersPerFace; ++i) {
-      if (stickers[start + i] != faceColor) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-void Cube::rotateFaceClockwise(std::size_t face) {
-  const std::size_t start = face * StickersPerFace;
-
+void Cube::rotateUpClockwise() {
+  // Save original state before modifying stickers
   const auto old = stickers;
 
-  for (std::size_t row = 0; row < 3; ++row) {
-    for (std::size_t col = 0; col < 3; ++col) {
-      const std::size_t oldIndex = start + row * 3 + col;
+  // 1. Rotate the Up face (Face 0) itself clockwise
+  rotateFaceClockwise(0);
 
-      const std::size_t newIndex = start + col * 3 + (2 - row);
+  // 2. Shift the top row (row 0) of the 4 adjacent faces:
+  // Move Front top row to Left top row
+  stickers[36] = old[18];
+  stickers[37] = old[19];
+  stickers[38] = old[20];
 
-      stickers[newIndex] = old[oldIndex];
-    }
-  }
+  // Move Left top row to Back top row
+  stickers[27] = old[36];
+  stickers[28] = old[37];
+  stickers[29] = old[38];
+
+  // Move Back top row to Right top row
+  stickers[45] = old[27];
+  stickers[46] = old[28];
+  stickers[47] = old[29];
+
+  // Move Right top row to Front top row
+  stickers[18] = old[45];
+  stickers[19] = old[46];
+  stickers[20] = old[47];
 }
 
 void Cube::rotateFrontClockwise() {
-  // Save the original cube state before moving any stickers.
+  // Save original state before modifying stickers
   const auto old = stickers;
+
+  // 1. Rotate the Front face (Face 2) itself clockwise
   rotateFaceClockwise(2);
-  // Move the Up face's bottom row to the Right face's left column.
+
+  // 2. Shift the 12 bordering rim stickers:
+  // Move Up bottom row to Right left column
   stickers[45] = old[6];
   stickers[48] = old[7];
   stickers[51] = old[8];
 
-  // Move the Right face's left column to the Down face's top row.
+  // Move Right left column to Down top row
   stickers[9] = old[45];
   stickers[10] = old[48];
   stickers[11] = old[51];
 
-  // Move the Down face's top row to the Left face's right column.
+  // Move Down top row to Left right column
   stickers[38] = old[9];
   stickers[41] = old[10];
   stickers[44] = old[11];
 
-  // Move the Left face's right column to the Up face's bottom row.
+  // Move Left right column to Up bottom row
   stickers[6] = old[44];
   stickers[7] = old[41];
   stickers[8] = old[38];
 }
 
-bool Cube::hasSameState(const Cube &other) const {
-  return stickers == other.stickers;
+void Cube::rotateFaceClockwise(std::size_t face) {
+  const std::size_t start = face * StickersPerFace;
+  const auto old = stickers;
+
+  // Standard 3x3 matrix clockwise rotation: (row, col) -> (col, 2 - row)
+  for (std::size_t row = 0; row < 3; ++row) {
+    for (std::size_t col = 0; col < 3; ++col) {
+      const std::size_t oldIndex = start + row * 3 + col;
+      const std::size_t newIndex = start + col * 3 + (2 - row);
+      stickers[newIndex] = old[oldIndex];
+    }
+  }
 }
