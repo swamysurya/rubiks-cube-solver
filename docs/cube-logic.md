@@ -199,6 +199,25 @@ When looking at the Left face, turning it clockwise shifts vertical columns on t
   - `stickers[3]  = old[32]`
   - `stickers[6]  = old[29]`
 
+### Operation 6: Adjacent Rim Permutations for $D$ Turn (Down)
+When looking at the Down face, turning it clockwise shifts the bottom row (row 2) across the 4 bordering faces:
+- **Left (`L`) bottom row** $\to$ **Back (`B`) bottom row**:
+  - `stickers[33] = old[42]`
+  - `stickers[34] = old[43]`
+  - `stickers[35] = old[44]`
+- **Back (`B`) bottom row** $\to$ **Right (`R`) bottom row**:
+  - `stickers[51] = old[33]`
+  - `stickers[52] = old[34]`
+  - `stickers[53] = old[35]`
+- **Right (`R`) bottom row** $\to$ **Front (`F`) bottom row**:
+  - `stickers[24] = old[51]`
+  - `stickers[25] = old[52]`
+  - `stickers[26] = old[53]`
+- **Front (`F`) bottom row** $\to$ **Left (`L`) bottom row**:
+  - `stickers[42] = old[24]`
+  - `stickers[43] = old[25]`
+  - `stickers[44] = old[26]`
+
 ---
 
 ## 5. State Inspection and Helpers

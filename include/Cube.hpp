@@ -81,6 +81,10 @@ public:
   // Back -> Right -> Front.
   void rotateUpClockwise();
 
+  // Rotates the Down face (Face 1, Yellow) clockwise by 90 degrees.
+  // Also shifts the bottom rows (row 2) of the 4 adjacent faces: Left -> Back -> Right -> Front -> Left.
+  void rotateDownClockwise();
+
   // Rotates the Front face (Face 2, Red) clockwise by 90 degrees.
   // Also shifts the adjacent border stickers across Up, Right, Down, and Left
   // faces.

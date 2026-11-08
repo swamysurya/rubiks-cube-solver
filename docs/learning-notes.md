@@ -8,7 +8,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
 
 1. 📂 **[Git & Version Control Notes](git.md)**
    - Conventional commit message format (`feat`, `fix`, `docs`, `build`, `test`, `chore`)
-   - Multi-line commit commands with bodies
+   - Feature branching workflow standard practice (`feat/<feature-name>`)
    - Essential repository inspection commands (`status`, `diff`, `diff --cached`, `push`)
    - PowerShell terminal utilities
 

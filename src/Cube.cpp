@@ -132,6 +132,35 @@ void Cube::rotateUpClockwise() {
   stickers[20] = old[47];
 }
 
+void Cube::rotateDownClockwise() {
+  // Save original state before modifying stickers
+  const auto old = stickers;
+
+  // 1. Rotate the Down face (Face 1) itself clockwise
+  rotateFaceClockwise(1);
+
+  // 2. Shift the bottom row (row 2) of the 4 adjacent faces:
+  // Move Left bottom row to Back bottom row
+  stickers[33] = old[42];
+  stickers[34] = old[43];
+  stickers[35] = old[44];
+
+  // Move Back bottom row to Right bottom row
+  stickers[51] = old[33];
+  stickers[52] = old[34];
+  stickers[53] = old[35];
+
+  // Move Right bottom row to Front bottom row
+  stickers[24] = old[51];
+  stickers[25] = old[52];
+  stickers[26] = old[53];
+
+  // Move Front bottom row to Left bottom row
+  stickers[42] = old[24];
+  stickers[43] = old[25];
+  stickers[44] = old[26];
+}
+
 void Cube::rotateFrontClockwise() {
   // Save original state before modifying stickers
   const auto old = stickers;
