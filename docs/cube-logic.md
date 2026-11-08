@@ -161,6 +161,25 @@ When looking down at the Up face, a clockwise turn shifts the top row (row 0) ac
   - `stickers[19] = old[46]`
   - `stickers[20] = old[47]`
 
+### Operation 4: Adjacent Rim Permutations for $R$ Turn (Right)
+When looking at the Right face, turning it clockwise rotates columns on the 4 bordering faces:
+- **Front (`F`) right column** $\to$ **Up (`U`) right column**:
+  - `stickers[2] = old[20]`
+  - `stickers[5] = old[23]`
+  - `stickers[8] = old[26]`
+- **Up (`U`) right column** $\to$ **Back (`B`) left column (inverted)**:
+  - `stickers[27] = old[8]`
+  - `stickers[30] = old[5]`
+  - `stickers[33] = old[2]`
+- **Back (`B`) left column** $\to$ **Down (`D`) right column (inverted)**:
+  - `stickers[11] = old[33]`
+  - `stickers[14] = old[30]`
+  - `stickers[17] = old[27]`
+- **Down (`D`) right column** $\to$ **Front (`F`) right column**:
+  - `stickers[20] = old[11]`
+  - `stickers[23] = old[14]`
+  - `stickers[26] = old[17]`
+
 ---
 
 ## 5. State Inspection and Helpers

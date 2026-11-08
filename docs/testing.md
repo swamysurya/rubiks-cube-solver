@@ -88,6 +88,27 @@ assert(fourTurnUp.hasSameState(originalCube));
 ```
 - **Verifies**: Repeating the Up rotation 4 times restores all stickers to their original positions.
 
+### Test 8: One Right Turn Changes State ($R \ne I$)
+```cpp
+Cube onceTurnedRight;
+onceTurnedRight.rotateRightClockwise();
+
+assert(!onceTurnedRight.hasSameState(originalCube));
+```
+- **Verifies**: A Right face rotation changes the cube state and shifts vertical columns.
+
+### Test 9: Four Right Turns Restore the Cube ($R^4 = I$)
+```cpp
+Cube fourTurnRight;
+fourTurnRight.rotateRightClockwise();
+fourTurnRight.rotateRightClockwise();
+fourTurnRight.rotateRightClockwise();
+fourTurnRight.rotateRightClockwise();
+
+assert(fourTurnRight.hasSameState(originalCube));
+```
+- **Verifies**: Repeating the Right rotation 4 times restores all stickers to their original positions.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -110,5 +131,7 @@ PASS: One Front turn changes the cube state.
 PASS: Four Front turns restore every sticker position.
 PASS: One Up turn changes the cube state.
 PASS: Four Up turns restore every sticker position.
+PASS: One Right turn changes the cube state.
+PASS: Four Right turns restore every sticker position.
 ```
 

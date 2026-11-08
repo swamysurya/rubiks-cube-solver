@@ -161,6 +161,35 @@ void Cube::rotateFrontClockwise() {
   stickers[8] = old[38];
 }
 
+void Cube::rotateRightClockwise() {
+  // Save original state before modifying stickers
+  const auto old = stickers;
+
+  // 1. Rotate the Right face (Face 5) itself clockwise
+  rotateFaceClockwise(5);
+
+  // 2. Shift the bordering columns:
+  // Move Front right column to Up right column
+  stickers[2] = old[20];
+  stickers[5] = old[23];
+  stickers[8] = old[26];
+
+  // Move Up right column to Back left column (inverted)
+  stickers[27] = old[8];
+  stickers[30] = old[5];
+  stickers[33] = old[2];
+
+  // Move Back left column to Down right column (inverted)
+  stickers[11] = old[33];
+  stickers[14] = old[30];
+  stickers[17] = old[27];
+
+  // Move Down right column to Front right column
+  stickers[20] = old[11];
+  stickers[23] = old[14];
+  stickers[26] = old[17];
+}
+
 void Cube::rotateFaceClockwise(std::size_t face) {
   const std::size_t start = face * StickersPerFace;
   const auto old = stickers;

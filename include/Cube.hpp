@@ -86,6 +86,11 @@ public:
   // faces.
   void rotateFrontClockwise();
 
+  // Rotates the Right face (Face 5, Green) clockwise by 90 degrees.
+  // Also shifts the bordering columns: Front -> Up -> Back (inverted) -> Down
+  // (inverted) -> Front.
+  void rotateRightClockwise();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).
