@@ -1,4 +1,3 @@
-
 #include "Cube.hpp"
 
 #include <cassert>

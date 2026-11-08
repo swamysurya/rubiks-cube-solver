@@ -12,7 +12,7 @@ Cube::Cube() {
       Color::Blue,   // Left
       Color::Green   // Right
   };
-
+  // Initialize each sticker to the color of its face.
   for (std::size_t face = 0; face < FaceCount; ++face) {
     for (std::size_t sticker = 0; sticker < StickersPerFace; ++sticker) {
       stickers[face * StickersPerFace + sticker] = faceColors[face];
