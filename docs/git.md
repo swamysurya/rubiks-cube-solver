@@ -108,43 +108,7 @@ git push origin main
 
 ---
 
-## 4. Git Stashing (`git stash`)
-
-### What is Git Stash?
-`git stash` temporarily shelves (or "stashes") uncommitted changes (both staged and unstaged) in your working directory, resetting your working tree to match `HEAD`. This allows you to work on something else or switch branches without losing your in-progress work or creating temporary "WIP" commits.
-
-### When to Use It?
-1. **Urgent Context Switching**: You are in the middle of implementing a feature on `feat/...`, but you need to switch to `main` or another branch to fix an urgent bug or review code.
-2. **Pulling Upstream Changes**: Git refuses to `git pull` because your local changes would be overwritten. You can `git stash`, pull, and then `git stash pop`.
-3. **Experimental Testing**: You want to test how the codebase compiles/runs without your current edits without deleting them.
-
-### Essential Stash Commands
-```powershell
-# 1. Stash current tracked modifications
-git stash
-
-# 2. Stash including newly created (untracked) files
-git stash -u
-
-# 3. Stash with a descriptive note
-git stash save "WIP: prime rotations"
-
-# 4. View the list of all saved stashes
-git stash list
-
-# 5. Restore the most recent stash and remove it from the stash list
-git stash pop
-
-# 6. Restore the stash without removing it from the stash list
-git stash apply
-
-# 7. Discard the most recent stash (or a specific stash like stash@{0})
-git stash drop
-```
-
----
-
-## 5. Helpful Terminal Commands (PowerShell)
+## 3. Helpful Terminal Commands (PowerShell)
 ```powershell
 # View file contents directly in terminal
 Get-Content src/main.cpp

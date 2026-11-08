@@ -172,44 +172,6 @@ assert(fourTurnBack == originalCube);
 ```
 - **Verifies**: Repeating the Back rotation 4 times restores all stickers, and C++20 `operator==` confirms equality.
 
-### Tests 16–21: Prime Rotation Alteration & Inverse Cancellation ($X \cdot X' = I$)
-```cpp
-// Verified for each face: F, U, D, B, L, R
-Cube testX;
-testX.rotateFaceClockwise();
-testX.rotateFaceCounterClockwise();
-assert(testX == originalCube);
-
-Cube onceTurnedPrime;
-onceTurnedPrime.rotateFaceCounterClockwise();
-assert(onceTurnedPrime != originalCube);
-```
-- **Verifies**:
-  - $X' \ne I$: Each prime move performs a real transformation.
-  - $X \cdot X' = I$: Applying a clockwise turn followed by its counter-clockwise turn returns the cube to its exact initial state.
-
-### Test 22: Order of Counter-Clockwise Turns ($(X')^4 = I$)
-```cpp
-Cube fourTurnUPrime;
-fourTurnUPrime.rotateUpCounterClockwise();
-fourTurnUPrime.rotateUpCounterClockwise();
-fourTurnUPrime.rotateUpCounterClockwise();
-fourTurnUPrime.rotateUpCounterClockwise();
-
-assert(fourTurnUPrime == originalCube);
-```
-- **Verifies**: Four consecutive prime turns restore all stickers, proving the cyclic group order of 4 for inverses.
-
-### Test 23: Reverse Cancellation Order ($X' \cdot X = I$)
-```cpp
-Cube reverseCancelR;
-reverseCancelR.rotateRightCounterClockwise();
-reverseCancelR.rotateRightClockwise();
-
-assert(reverseCancelR == originalCube);
-```
-- **Verifies**: The commutative cancellation property in group theory: $X^{-1} \cdot X = X \cdot X^{-1} = I$.
-
 ---
 
 ## 3. Running Tests with CTest
@@ -240,13 +202,5 @@ PASS: One Down turn changes the cube state.
 PASS: Four Down turns restore every sticker position.
 PASS: One Back turn changes the cube state (verified with operator!=).
 PASS: Four Back turns restore every sticker position (verified with operator==).
-PASS: Front Prime (F') changes state and cancels F (F * F' = I).
-PASS: Up Prime (U') changes state and cancels U (U * U' = I).
-PASS: Down Prime (D') changes state and cancels D (D * D' = I).
-PASS: Back Prime (B') changes state and cancels B (B * B' = I).
-PASS: Left Prime (L') changes state and cancels L (L * L' = I).
-PASS: Right Prime (R') changes state and cancels R (R * R' = I).
-PASS: Four Prime turns restore every sticker position ((U')^4 = I).
-PASS: Reverse cancellation verified (R' * R = I).
 ```
 
