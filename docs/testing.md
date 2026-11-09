@@ -429,6 +429,41 @@ assert(onceTurnedU2 == twoTurnUCounterClockwise);
 ```
 - **Verifies**: Direction invariance: turning $+180^\circ$ and $-180^\circ$ are identical in $\mathbb{Z}_4$.
 
+### Test 38: One Down Double Turn Changes State ($D2 \ne I$)
+```cpp
+Cube onceTurnedD2;
+onceTurnedD2.rotateDownDouble();
+assert(onceTurnedD2 != originalCube);
+```
+- **Verifies**: A 180-degree Down double turn modifies the cube state.
+
+### Test 39: Self-Inverse Involution Property ($(D2)^2 = I$)
+```cpp
+Cube twoTurnD2;
+twoTurnD2.rotateDownDouble();
+twoTurnD2.rotateDownDouble();
+assert(twoTurnD2 == originalCube);
+```
+- **Verifies**: Applying $D2$ twice restores identity ($(D2)^2 = I$).
+
+### Test 40: Equivalence with Two Clockwise Turns ($D2 \equiv D \cdot D$)
+```cpp
+Cube twoTurnDClockwise;
+twoTurnDClockwise.rotateDownClockwise();
+twoTurnDClockwise.rotateDownClockwise();
+assert(onceTurnedD2 == twoTurnDClockwise);
+```
+- **Verifies**: $D2$ produces the exact same permutation as two $90^\circ$ clockwise Down turns.
+
+### Test 41: Equivalence with Two Prime Turns ($D2 \equiv D' \cdot D'$)
+```cpp
+Cube twoTurnDCounterClockwise;
+twoTurnDCounterClockwise.rotateDownCounterClockwise();
+twoTurnDCounterClockwise.rotateDownCounterClockwise();
+assert(onceTurnedD2 == twoTurnDCounterClockwise);
+```
+- **Verifies**: Direction invariance: $D \cdot D \equiv D' \cdot D'$.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -481,5 +516,9 @@ PASS: One Up Double (U2) turn changes the cube state.
 PASS: Two Up Double turns restore every sticker position ((U2)^2 = I).
 PASS: Up Double is identical to two clockwise turns (U2 == U * U).
 PASS: Up Double is identical to two prime turns (U2 == U' * U').
+PASS: One Down Double (D2) turn changes the cube state.
+PASS: Two Down Double turns restore every sticker position ((D2)^2 = I).
+PASS: Down Double is identical to two clockwise turns (D2 == D * D).
+PASS: Down Double is identical to two prime turns (D2 == D' * D').
 ```
 

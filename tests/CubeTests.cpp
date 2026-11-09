@@ -378,5 +378,33 @@ int main() {
   assert(onceTurnedU2 == twoTurnUCounterClockwise);
   std::cout << "PASS: Up Double is identical to two prime turns (U2 == U' * U').\n";
 
+  // Test 38: Down Double alters state (D2 != I)
+  Cube onceTurnedD2;
+  onceTurnedD2.rotateDownDouble();
+  assert(onceTurnedD2 != originalCube);
+  std::cout << "PASS: One Down Double (D2) turn changes the cube state.\n";
+
+  // Test 39: Self-Inverse Property ((D2)^2 = I)
+  Cube twoTurnD2;
+  twoTurnD2.rotateDownDouble();
+  twoTurnD2.rotateDownDouble();
+  assert(twoTurnD2 == originalCube);
+  std::cout << "PASS: Two Down Double turns restore every sticker position "
+               "((D2)^2 = I).\n";
+
+  // Test 40: Equivalence with two clockwise turns (D2 == D * D)
+  Cube twoTurnDClockwise;
+  twoTurnDClockwise.rotateDownClockwise();
+  twoTurnDClockwise.rotateDownClockwise();
+  assert(onceTurnedD2 == twoTurnDClockwise);
+  std::cout << "PASS: Down Double is identical to two clockwise turns (D2 == D * D).\n";
+
+  // Test 41: Equivalence with two counter-clockwise turns (D2 == D' * D')
+  Cube twoTurnDCounterClockwise;
+  twoTurnDCounterClockwise.rotateDownCounterClockwise();
+  twoTurnDCounterClockwise.rotateDownCounterClockwise();
+  assert(onceTurnedD2 == twoTurnDCounterClockwise);
+  std::cout << "PASS: Down Double is identical to two prime turns (D2 == D' * D').\n";
+
   return 0;
 }

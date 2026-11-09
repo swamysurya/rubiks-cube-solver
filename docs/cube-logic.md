@@ -454,6 +454,11 @@ void Cube::rotateUpDouble() {
   rotateUpClockwise();
   rotateUpClockwise();
 }
+
+void Cube::rotateDownDouble() {
+  rotateDownClockwise();
+  rotateDownClockwise();
+}
 ```
 Reusing the battle-tested clockwise move guarantees complete consistency and zero duplicated logic.
 
