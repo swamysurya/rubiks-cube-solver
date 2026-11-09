@@ -346,5 +346,37 @@ int main() {
   assert(reverseCancelR == originalCube);
   std::cout << "PASS: Reverse cancellation verified (R' * R = I).\n";
 
+  // =========================================================================
+  // 9. Double (Half-Turn) Rotations: Up Double (U2) Tests
+  // =========================================================================
+
+  // Test 34: Up Double alters state (U2 != I)
+  Cube onceTurnedU2;
+  onceTurnedU2.rotateUpDouble();
+  assert(onceTurnedU2 != originalCube);
+  std::cout << "PASS: One Up Double (U2) turn changes the cube state.\n";
+
+  // Test 35: Self-Inverse Property ((U2)^2 = I)
+  Cube twoTurnU2;
+  twoTurnU2.rotateUpDouble();
+  twoTurnU2.rotateUpDouble();
+  assert(twoTurnU2 == originalCube);
+  std::cout << "PASS: Two Up Double turns restore every sticker position "
+               "((U2)^2 = I).\n";
+
+  // Test 36: Equivalence with two clockwise turns (U2 == U * U)
+  Cube twoTurnUClockwise;
+  twoTurnUClockwise.rotateUpClockwise();
+  twoTurnUClockwise.rotateUpClockwise();
+  assert(onceTurnedU2 == twoTurnUClockwise);
+  std::cout << "PASS: Up Double is identical to two clockwise turns (U2 == U * U).\n";
+
+  // Test 37: Equivalence with two counter-clockwise turns (U2 == U' * U')
+  Cube twoTurnUCounterClockwise;
+  twoTurnUCounterClockwise.rotateUpCounterClockwise();
+  twoTurnUCounterClockwise.rotateUpCounterClockwise();
+  assert(onceTurnedU2 == twoTurnUCounterClockwise);
+  std::cout << "PASS: Up Double is identical to two prime turns (U2 == U' * U').\n";
+
   return 0;
 }

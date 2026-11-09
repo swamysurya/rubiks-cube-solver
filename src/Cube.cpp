@@ -322,6 +322,18 @@ void Cube::rotateRightCounterClockwise() {
   rotateRightClockwise();
 }
 
+// =============================================================================
+// 5. Double (Half-Turn) Rotations (180 degrees)
+// =============================================================================
+// A double turn rotates a face by 180 degrees (two 90-degree turns: X2 = X^2).
+// In group theory, an operation that is its own inverse is an involution:
+//   (X2)^2 = X^4 = Identity.
+
+void Cube::rotateUpDouble() {
+  rotateUpClockwise();
+  rotateUpClockwise();
+}
+
 void Cube::rotateFaceClockwise(std::size_t face) {
   const std::size_t start = face * StickersPerFace;
   const auto old = stickers;

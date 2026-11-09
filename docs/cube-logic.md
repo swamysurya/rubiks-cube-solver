@@ -433,5 +433,30 @@ reverseCancelU.rotateUpClockwise();        // X
 assert(reverseCancelU == originalCube);    // Returns true!
 ```
 
+---
+
+## 8. Double (Half-Turn) Rotations ($180^\circ$) & Involutions
+
+### The Involution Property: $(X2)^2 = I$
+In mathematics and abstract algebra, an **involution** is a function or group element that is its own inverse:
+$$g = g^{-1} \iff g^2 = I$$
+
+A $180^\circ$ face turn (denoted as $X2$ in WCA notation) is an involution because turning a face by $180^\circ$ twice completes a full $360^\circ$ rotation:
+$$(X2)^2 = (X^2)^2 = X^4 = I$$
+
+### Direction Invariance: $+180^\circ \equiv -180^\circ$
+Because $180^\circ \equiv -180^\circ \pmod{360^\circ}$, turning a face clockwise by $180^\circ$ produces the exact same permutation as turning it counter-clockwise by $180^\circ$:
+$$\mathbf{X2 \equiv X \cdot X \equiv X' \cdot X'}$$
+
+### DRY Implementation in C++
+```cpp
+void Cube::rotateUpDouble() {
+  rotateUpClockwise();
+  rotateUpClockwise();
+}
+```
+Reusing the battle-tested clockwise move guarantees complete consistency and zero duplicated logic.
+
+
 
 

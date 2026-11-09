@@ -394,6 +394,41 @@ assert(reverseCancelR == originalCube);
 ```
 - **Verifies**: Cancellation holds in reverse ($R' \cdot R = I$).
 
+### Test 34: One Up Double Turn Changes State ($U2 \ne I$)
+```cpp
+Cube onceTurnedU2;
+onceTurnedU2.rotateUpDouble();
+assert(onceTurnedU2 != originalCube);
+```
+- **Verifies**: A 180-degree double turn modifies the cube state.
+
+### Test 35: Self-Inverse Involution Property ($(U2)^2 = I$)
+```cpp
+Cube twoTurnU2;
+twoTurnU2.rotateUpDouble();
+twoTurnU2.rotateUpDouble();
+assert(twoTurnU2 == originalCube);
+```
+- **Verifies**: Applying $U2$ twice restores identity, proving $U2$ is an involution ($(U2)^2 = I$).
+
+### Test 36: Equivalence with Two Clockwise Turns ($U2 \equiv U \cdot U$)
+```cpp
+Cube twoTurnUClockwise;
+twoTurnUClockwise.rotateUpClockwise();
+twoTurnUClockwise.rotateUpClockwise();
+assert(onceTurnedU2 == twoTurnUClockwise);
+```
+- **Verifies**: $U2$ produces the exact same permutation as two $90^\circ$ clockwise turns.
+
+### Test 37: Equivalence with Two Prime Turns ($U2 \equiv U' \cdot U'$)
+```cpp
+Cube twoTurnUCounterClockwise;
+twoTurnUCounterClockwise.rotateUpCounterClockwise();
+twoTurnUCounterClockwise.rotateUpCounterClockwise();
+assert(onceTurnedU2 == twoTurnUCounterClockwise);
+```
+- **Verifies**: Direction invariance: turning $+180^\circ$ and $-180^\circ$ are identical in $\mathbb{Z}_4$.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -442,5 +477,9 @@ PASS: Reverse cancellation verified (L' * L = I).
 PASS: Right Prime (R') changes state and cancels R (R * R' = I).
 PASS: Four Right Prime turns restore every sticker position ((R')^4 = I).
 PASS: Reverse cancellation verified (R' * R = I).
+PASS: One Up Double (U2) turn changes the cube state.
+PASS: Two Up Double turns restore every sticker position ((U2)^2 = I).
+PASS: Up Double is identical to two clockwise turns (U2 == U * U).
+PASS: Up Double is identical to two prime turns (U2 == U' * U').
 ```
 

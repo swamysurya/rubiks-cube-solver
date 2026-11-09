@@ -137,6 +137,16 @@ public:
   // Rotates the Right face (Face 5, Green) counter-clockwise (R')
   void rotateRightCounterClockwise();
 
+  // -------------------------------------------------------------------------
+  // 6. Double (Half-Turn) Rotations (180 degrees)
+  // -------------------------------------------------------------------------
+  // In WCA notation, a double turn (denoted with '2', e.g. U2) turns the face
+  // 180 degrees. Because 180 = -180 (mod 360), direction does not matter.
+  // Double moves are their own inverse (involutions): (X2)^2 = Identity.
+
+  // Rotates the Up face (Face 0, White) 180 degrees (U2)
+  void rotateUpDouble();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).
