@@ -464,6 +464,38 @@ assert(onceTurnedD2 == twoTurnDCounterClockwise);
 ```
 - **Verifies**: Direction invariance: $D \cdot D \equiv D' \cdot D'$.
 
+### Test 42–45: Front Double ($F2$) Invariants
+```cpp
+// 1. Alteration: F2 != I
+// 2. Self-Inverse: (F2)^2 == I
+// 3. Equivalence: F2 == F * F
+// 4. Prime Equivalence: F2 == F' * F'
+```
+- **Verifies**: Front Double modifies state, restores state after 2 turns, and matches $F \cdot F$ and $F' \cdot F'$.
+
+### Test 46–49: Back Double ($B2$) Invariants
+```cpp
+// 1. Alteration: B2 != I
+// 2. Self-Inverse: (B2)^2 == I
+// 3. Equivalence: B2 == B * B
+// 4. Prime Equivalence: B2 == B' * B'
+```
+- **Verifies**: Back Double modifies state, restores state after 2 turns, and matches $B \cdot B$ and $B' \cdot B'$.
+
+### Test 50: Disjoint Opposite Face Commutativity ($F2 \cdot B2 = B2 \cdot F2$)
+```cpp
+Cube fbCube;
+fbCube.rotateFrontDouble();
+fbCube.rotateBackDouble();
+
+Cube bfCube;
+bfCube.rotateBackDouble();
+bfCube.rotateFrontDouble();
+
+assert(fbCube == bfCube);
+```
+- **Verifies**: Because Front and Back share zero stickers, their operations commute.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -520,5 +552,14 @@ PASS: One Down Double (D2) turn changes the cube state.
 PASS: Two Down Double turns restore every sticker position ((D2)^2 = I).
 PASS: Down Double is identical to two clockwise turns (D2 == D * D).
 PASS: Down Double is identical to two prime turns (D2 == D' * D').
+PASS: One Front Double (F2) turn changes the cube state.
+PASS: Two Front Double turns restore every sticker position ((F2)^2 = I).
+PASS: Front Double is identical to two clockwise turns (F2 == F * F).
+PASS: Front Double is identical to two prime turns (F2 == F' * F').
+PASS: One Back Double (B2) turn changes the cube state.
+PASS: Two Back Double turns restore every sticker position ((B2)^2 = I).
+PASS: Back Double is identical to two clockwise turns (B2 == B * B).
+PASS: Back Double is identical to two prime turns (B2 == B' * B').
+PASS: Disjoint opposite faces commute (F2 * B2 == B2 * F2).
 ```
 

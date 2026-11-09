@@ -459,8 +459,27 @@ void Cube::rotateDownDouble() {
   rotateDownClockwise();
   rotateDownClockwise();
 }
+
+void Cube::rotateFrontDouble() {
+  rotateFrontClockwise();
+  rotateFrontClockwise();
+}
+
+void Cube::rotateBackDouble() {
+  rotateBackClockwise();
+  rotateBackClockwise();
+}
 ```
 Reusing the battle-tested clockwise move guarantees complete consistency and zero duplicated logic.
+
+### Disjoint Opposite Face Commutativity
+In the Rubik's Cube group, any two opposite faces (such as Front and Back, or Up and Down) have completely disjoint sets of stickers:
+$$\text{Stickers}(F) \cap \text{Stickers}(B) = \emptyset$$
+
+Because their cycles do not touch any common pieces, their operations **commute**:
+$$F \cdot B = B \cdot F \quad \text{and} \quad \mathbf{F2 \cdot B2 = B2 \cdot F2}$$
+*(Crucial optimization for the solver engine: we never need to search both paths $F2 \to B2$ and $B2 \to F2$ because they result in the exact same state!)*
+
 
 
 

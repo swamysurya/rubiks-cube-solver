@@ -406,5 +406,73 @@ int main() {
   assert(onceTurnedD2 == twoTurnDCounterClockwise);
   std::cout << "PASS: Down Double is identical to two prime turns (D2 == D' * D').\n";
 
+  // Test 42: Front Double alters state (F2 != I)
+  Cube onceTurnedF2;
+  onceTurnedF2.rotateFrontDouble();
+  assert(onceTurnedF2 != originalCube);
+  std::cout << "PASS: One Front Double (F2) turn changes the cube state.\n";
+
+  // Test 43: Self-Inverse Property ((F2)^2 = I)
+  Cube twoTurnF2;
+  twoTurnF2.rotateFrontDouble();
+  twoTurnF2.rotateFrontDouble();
+  assert(twoTurnF2 == originalCube);
+  std::cout << "PASS: Two Front Double turns restore every sticker position "
+               "((F2)^2 = I).\n";
+
+  // Test 44: Equivalence with two clockwise turns (F2 == F * F)
+  Cube twoTurnFClockwise;
+  twoTurnFClockwise.rotateFrontClockwise();
+  twoTurnFClockwise.rotateFrontClockwise();
+  assert(onceTurnedF2 == twoTurnFClockwise);
+  std::cout << "PASS: Front Double is identical to two clockwise turns (F2 == F * F).\n";
+
+  // Test 45: Equivalence with two counter-clockwise turns (F2 == F' * F')
+  Cube twoTurnFCounterClockwise;
+  twoTurnFCounterClockwise.rotateFrontCounterClockwise();
+  twoTurnFCounterClockwise.rotateFrontCounterClockwise();
+  assert(onceTurnedF2 == twoTurnFCounterClockwise);
+  std::cout << "PASS: Front Double is identical to two prime turns (F2 == F' * F').\n";
+
+  // Test 46: Back Double alters state (B2 != I)
+  Cube onceTurnedB2;
+  onceTurnedB2.rotateBackDouble();
+  assert(onceTurnedB2 != originalCube);
+  std::cout << "PASS: One Back Double (B2) turn changes the cube state.\n";
+
+  // Test 47: Self-Inverse Property ((B2)^2 = I)
+  Cube twoTurnB2;
+  twoTurnB2.rotateBackDouble();
+  twoTurnB2.rotateBackDouble();
+  assert(twoTurnB2 == originalCube);
+  std::cout << "PASS: Two Back Double turns restore every sticker position "
+               "((B2)^2 = I).\n";
+
+  // Test 48: Equivalence with two clockwise turns (B2 == B * B)
+  Cube twoTurnBClockwise;
+  twoTurnBClockwise.rotateBackClockwise();
+  twoTurnBClockwise.rotateBackClockwise();
+  assert(onceTurnedB2 == twoTurnBClockwise);
+  std::cout << "PASS: Back Double is identical to two clockwise turns (B2 == B * B).\n";
+
+  // Test 49: Equivalence with two counter-clockwise turns (B2 == B' * B')
+  Cube twoTurnBCounterClockwise;
+  twoTurnBCounterClockwise.rotateBackCounterClockwise();
+  twoTurnBCounterClockwise.rotateBackCounterClockwise();
+  assert(onceTurnedB2 == twoTurnBCounterClockwise);
+  std::cout << "PASS: Back Double is identical to two prime turns (B2 == B' * B').\n";
+
+  // Test 50: Disjoint Face Commutativity (F2 * B2 == B2 * F2)
+  Cube fbCube;
+  fbCube.rotateFrontDouble();
+  fbCube.rotateBackDouble();
+
+  Cube bfCube;
+  bfCube.rotateBackDouble();
+  bfCube.rotateFrontDouble();
+
+  assert(fbCube == bfCube);
+  std::cout << "PASS: Disjoint opposite faces commute (F2 * B2 == B2 * F2).\n";
+
   return 0;
 }
