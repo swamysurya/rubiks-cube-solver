@@ -268,7 +268,8 @@ int main() {
   std::cout
       << "PASS: Back Prime (B') changes state and cancels B (B * B' = I).\n";
 
-  // Test 26: Four consecutive Back Prime turns restore original state ((B')^4 = I)
+  // Test 26: Four consecutive Back Prime turns restore original state ((B')^4 =
+  // I)
   Cube fourTurnBPrime;
   fourTurnBPrime.rotateBackCounterClockwise();
   fourTurnBPrime.rotateBackCounterClockwise();
