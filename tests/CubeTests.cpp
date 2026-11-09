@@ -286,5 +286,35 @@ int main() {
   assert(reverseCancelB == originalCube);
   std::cout << "PASS: Reverse cancellation verified (B' * B = I).\n";
 
+  // Test 28: Left Prime alters state (L' != I) and cancels Left (L * L' = I)
+  Cube testL;
+  testL.rotateLeftClockwise();
+  testL.rotateLeftCounterClockwise();
+  assert(testL == originalCube);
+
+  Cube onceTurnedLPrime;
+  onceTurnedLPrime.rotateLeftCounterClockwise();
+  assert(onceTurnedLPrime != originalCube);
+  std::cout
+      << "PASS: Left Prime (L') changes state and cancels L (L * L' = I).\n";
+
+  // Test 29: Four consecutive Left Prime turns restore original state ((L')^4 =
+  // I)
+  Cube fourTurnLPrime;
+  fourTurnLPrime.rotateLeftCounterClockwise();
+  fourTurnLPrime.rotateLeftCounterClockwise();
+  fourTurnLPrime.rotateLeftCounterClockwise();
+  fourTurnLPrime.rotateLeftCounterClockwise();
+  assert(fourTurnLPrime == originalCube);
+  std::cout << "PASS: Four Left Prime turns restore every sticker position "
+               "((L')^4 = I).\n";
+
+  // Test 30: Reverse cancellation order (L' * L = I)
+  Cube reverseCancelL;
+  reverseCancelL.rotateLeftCounterClockwise();
+  reverseCancelL.rotateLeftClockwise();
+  assert(reverseCancelL == originalCube);
+  std::cout << "PASS: Reverse cancellation verified (L' * L = I).\n";
+
   return 0;
 }

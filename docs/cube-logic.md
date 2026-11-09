@@ -303,6 +303,12 @@ void Cube::rotateBackCounterClockwise() {
   rotateBackClockwise();
   rotateBackClockwise();
 }
+
+void Cube::rotateLeftCounterClockwise() {
+  rotateLeftClockwise();
+  rotateLeftClockwise();
+  rotateLeftClockwise();
+}
 ```
 
 ### Mathematical Invariants & Cancellation

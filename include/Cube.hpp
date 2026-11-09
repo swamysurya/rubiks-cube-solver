@@ -131,6 +131,9 @@ public:
   // Rotates the Back face (Face 3, Orange) counter-clockwise (B')
   void rotateBackCounterClockwise();
 
+  // Rotates the Left face (Face 4, Blue) counter-clockwise (L')
+  void rotateLeftCounterClockwise();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).
