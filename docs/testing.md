@@ -496,6 +496,38 @@ assert(fbCube == bfCube);
 ```
 - **Verifies**: Because Front and Back share zero stickers, their operations commute.
 
+### Test 51–54: Left Double ($L2$) Invariants
+```cpp
+// 1. Alteration: L2 != I
+// 2. Self-Inverse: (L2)^2 == I
+// 3. Equivalence: L2 == L * L
+// 4. Prime Equivalence: L2 == L' * L'
+```
+- **Verifies**: Left Double modifies state, restores state after 2 turns, and matches $L \cdot L$ and $L' \cdot L'$.
+
+### Test 55–58: Right Double ($R2$) Invariants
+```cpp
+// 1. Alteration: R2 != I
+// 2. Self-Inverse: (R2)^2 == I
+// 3. Equivalence: R2 == R * R
+// 4. Prime Equivalence: R2 == R' * R'
+```
+- **Verifies**: Right Double modifies state, restores state after 2 turns, and matches $R \cdot R$ and $R' \cdot R'$.
+
+### Test 59: Disjoint Opposite Face Commutativity ($L2 \cdot R2 = R2 \cdot L2$)
+```cpp
+Cube lrCube;
+lrCube.rotateLeftDouble();
+lrCube.rotateRightDouble();
+
+Cube rlCube;
+rlCube.rotateRightDouble();
+rlCube.rotateLeftDouble();
+
+assert(lrCube == rlCube);
+```
+- **Verifies**: Because Left and Right share zero stickers, their operations commute.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -561,5 +593,14 @@ PASS: Two Back Double turns restore every sticker position ((B2)^2 = I).
 PASS: Back Double is identical to two clockwise turns (B2 == B * B).
 PASS: Back Double is identical to two prime turns (B2 == B' * B').
 PASS: Disjoint opposite faces commute (F2 * B2 == B2 * F2).
+PASS: One Left Double (L2) turn changes the cube state.
+PASS: Two Left Double turns restore every sticker position ((L2)^2 = I).
+PASS: Left Double is identical to two clockwise turns (L2 == L * L).
+PASS: Left Double is identical to two prime turns (L2 == L' * L').
+PASS: One Right Double (R2) turn changes the cube state.
+PASS: Two Right Double turns restore every sticker position ((R2)^2 = I).
+PASS: Right Double is identical to two clockwise turns (R2 == R * R).
+PASS: Right Double is identical to two prime turns (R2 == R' * R').
+PASS: Disjoint opposite faces commute (L2 * R2 == R2 * L2).
 ```
 

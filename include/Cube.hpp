@@ -156,6 +156,12 @@ public:
   // Rotates the Back face (Face 3, Orange) 180 degrees (B2)
   void rotateBackDouble();
 
+  // Rotates the Left face (Face 4, Blue) 180 degrees (L2)
+  void rotateLeftDouble();
+
+  // Rotates the Right face (Face 5, Green) 180 degrees (R2)
+  void rotateRightDouble();
+
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->
   // (col, 2 - row).

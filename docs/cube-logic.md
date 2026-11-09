@@ -469,16 +469,29 @@ void Cube::rotateBackDouble() {
   rotateBackClockwise();
   rotateBackClockwise();
 }
+
+void Cube::rotateLeftDouble() {
+  rotateLeftClockwise();
+  rotateLeftClockwise();
+}
+
+void Cube::rotateRightDouble() {
+  rotateRightClockwise();
+  rotateRightClockwise();
+}
 ```
 Reusing the battle-tested clockwise move guarantees complete consistency and zero duplicated logic.
 
 ### Disjoint Opposite Face Commutativity
-In the Rubik's Cube group, any two opposite faces (such as Front and Back, or Up and Down) have completely disjoint sets of stickers:
-$$\text{Stickers}(F) \cap \text{Stickers}(B) = \emptyset$$
+In the Rubik's Cube group, opposite face pairs have completely disjoint sets of stickers:
+* **Front & Back**: $\text{Stickers}(F) \cap \text{Stickers}(B) = \emptyset \implies F2 \cdot B2 = B2 \cdot F2$
+* **Up & Down**: $\text{Stickers}(U) \cap \text{Stickers}(D) = \emptyset \implies U2 \cdot D2 = D2 \cdot U2$
+* **Left & Right**: $\text{Stickers}(L) \cap \text{Stickers}(R) = \emptyset \implies L2 \cdot R2 = R2 \cdot L2$
 
 Because their cycles do not touch any common pieces, their operations **commute**:
-$$F \cdot B = B \cdot F \quad \text{and} \quad \mathbf{F2 \cdot B2 = B2 \cdot F2}$$
-*(Crucial optimization for the solver engine: we never need to search both paths $F2 \to B2$ and $B2 \to F2$ because they result in the exact same state!)*
+$$X \cdot Y = Y \cdot X \quad \text{and} \quad \mathbf{X2 \cdot Y2 = Y2 \cdot X2}$$
+*(Crucial optimization for the solver engine: we never need to search both paths $X2 \to Y2$ and $Y2 \to X2$ because they result in the exact same state!)*
+
 
 
 
