@@ -10,6 +10,8 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Conventional commit message format (`feat`, `fix`, `docs`, `build`, `test`, `chore`)
    - Feature branching workflow standard practice (`feat/<feature-name>`)
    - Essential repository inspection commands (`status`, `diff`, `diff --cached`, `push`)
+   - Release tagging and Semantic Versioning (`git tag -a v0.1.0`)
+   - Productive Git aliases configuration (`st`, `co`, `cob`, `cm`, `lg`)
    - PowerShell terminal utilities
 
 2. 📂 **[CMake & Build System Notes](cmake.md)**
