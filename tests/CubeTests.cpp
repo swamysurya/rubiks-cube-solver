@@ -328,7 +328,8 @@ int main() {
   std::cout
       << "PASS: Right Prime (R') changes state and cancels R (R * R' = I).\n";
 
-  // Test 32: Four consecutive Right Prime turns restore original state ((R')^4 = I)
+  // Test 32: Four consecutive Right Prime turns restore original state ((R')^4
+  // = I)
   Cube fourTurnRPrime;
   fourTurnRPrime.rotateRightCounterClockwise();
   fourTurnRPrime.rotateRightCounterClockwise();
