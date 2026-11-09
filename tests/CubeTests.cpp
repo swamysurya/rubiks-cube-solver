@@ -316,5 +316,34 @@ int main() {
   assert(reverseCancelL == originalCube);
   std::cout << "PASS: Reverse cancellation verified (L' * L = I).\n";
 
+  // Test 31: Right Prime alters state (R' != I) and cancels Right (R * R' = I)
+  Cube testR;
+  testR.rotateRightClockwise();
+  testR.rotateRightCounterClockwise();
+  assert(testR == originalCube);
+
+  Cube onceTurnedRPrime;
+  onceTurnedRPrime.rotateRightCounterClockwise();
+  assert(onceTurnedRPrime != originalCube);
+  std::cout
+      << "PASS: Right Prime (R') changes state and cancels R (R * R' = I).\n";
+
+  // Test 32: Four consecutive Right Prime turns restore original state ((R')^4 = I)
+  Cube fourTurnRPrime;
+  fourTurnRPrime.rotateRightCounterClockwise();
+  fourTurnRPrime.rotateRightCounterClockwise();
+  fourTurnRPrime.rotateRightCounterClockwise();
+  fourTurnRPrime.rotateRightCounterClockwise();
+  assert(fourTurnRPrime == originalCube);
+  std::cout << "PASS: Four Right Prime turns restore every sticker position "
+               "((R')^4 = I).\n";
+
+  // Test 33: Reverse cancellation order (R' * R = I)
+  Cube reverseCancelR;
+  reverseCancelR.rotateRightCounterClockwise();
+  reverseCancelR.rotateRightClockwise();
+  assert(reverseCancelR == originalCube);
+  std::cout << "PASS: Reverse cancellation verified (R' * R = I).\n";
+
   return 0;
 }

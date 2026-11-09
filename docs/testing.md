@@ -357,6 +357,43 @@ assert(reverseCancelL == originalCube);
 ```
 - **Verifies**: Cancellation holds in reverse ($L' \cdot L = I$).
 
+### Test 31: Right Prime Alters State ($R' \ne I$) and Cancels Right ($R \cdot R' = I$)
+```cpp
+Cube testR;
+testR.rotateRightClockwise();
+testR.rotateRightCounterClockwise();
+assert(testR == originalCube);
+
+Cube onceTurnedRPrime;
+onceTurnedRPrime.rotateRightCounterClockwise();
+assert(onceTurnedRPrime != originalCube);
+```
+- **Verifies**:
+  - $R' \ne I$: Right prime move performs a real transformation.
+  - $R \cdot R' = I$: Applying a clockwise Right turn followed by its counter-clockwise turn returns the cube to solved state.
+
+### Test 32: Four Right Prime Turns Restore Original State ($(R')^4 = I$)
+```cpp
+Cube fourTurnRPrime;
+fourTurnRPrime.rotateRightCounterClockwise();
+fourTurnRPrime.rotateRightCounterClockwise();
+fourTurnRPrime.rotateRightCounterClockwise();
+fourTurnRPrime.rotateRightCounterClockwise();
+
+assert(fourTurnRPrime == originalCube);
+```
+- **Verifies**: Four consecutive $R'$ turns restore all stickers, confirming cyclic order 4.
+
+### Test 33: Reverse Cancellation Order ($R' \cdot R = I$)
+```cpp
+Cube reverseCancelR;
+reverseCancelR.rotateRightCounterClockwise();
+reverseCancelR.rotateRightClockwise();
+
+assert(reverseCancelR == originalCube);
+```
+- **Verifies**: Cancellation holds in reverse ($R' \cdot R = I$).
+
 ---
 
 ## 3. Running Tests with CTest
@@ -402,5 +439,8 @@ PASS: Reverse cancellation verified (B' * B = I).
 PASS: Left Prime (L') changes state and cancels L (L * L' = I).
 PASS: Four Left Prime turns restore every sticker position ((L')^4 = I).
 PASS: Reverse cancellation verified (L' * L = I).
+PASS: Right Prime (R') changes state and cancels R (R * R' = I).
+PASS: Four Right Prime turns restore every sticker position ((R')^4 = I).
+PASS: Reverse cancellation verified (R' * R = I).
 ```
 

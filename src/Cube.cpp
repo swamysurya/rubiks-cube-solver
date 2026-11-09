@@ -316,6 +316,12 @@ void Cube::rotateLeftCounterClockwise() {
   rotateLeftClockwise();
 }
 
+void Cube::rotateRightCounterClockwise() {
+  rotateRightClockwise();
+  rotateRightClockwise();
+  rotateRightClockwise();
+}
+
 void Cube::rotateFaceClockwise(std::size_t face) {
   const std::size_t start = face * StickersPerFace;
   const auto old = stickers;
