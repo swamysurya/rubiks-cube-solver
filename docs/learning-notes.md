@@ -36,3 +36,4 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Deep-dive into Identity state ($I$), official WCA move notation, and group cancellation proofs ($X \cdot X' = I$)
    - Move representation enum (`enum class Move : std::uint8_t`) and O(1) jump-table dispatcher (`Cube::apply`)
    - C++ compilation model: Transitive Inclusion, Translation Units, and `inline constexpr` (C++17 ODR rules)
+   - WCA notation interface (`Notation.hpp`): C++ Namespaces vs Classes, zero-allocation `std::string_view` (memory layout & non-owning lifetimes), and `noexcept` guarantees

@@ -594,6 +594,171 @@ To eliminate linker errors and guarantee optimal performance, modern C++17 intro
 | **`std::size_t`** | The native unsigned integer type for counts, sizes, and array bounds (defined in `<cstddef>`). Prevents invalid negative values. |
 | **`= 18;`** | The standard WCA Half-Turn Metric (HTM): 6 faces $\times$ 3 turns ($90^\circ$ clockwise, $90^\circ$ counter-clockwise, $180^\circ$ double) = 18 discrete moves. |
 
+---
+
+## 11. WCA Move Notation Interface (`Notation.hpp`)
+
+### 11.1 Purpose: The Bidirectional Translation Bridge
+Computers work best with integers and compact enumerations (`Move::R`, `Move::U_PRIME`), while humans and cubing databases communicate using **WCA (World Cube Association) text** (`"R"`, `"U'"`).
+
+[`include/Notation.hpp`](../include/Notation.hpp) establishes a two-way translation bridge:
+
+```mermaid
+flowchart LR
+    A["Human / WCA Text<br/>e.g. \"R\", \"U'\", \"F2\""] -- "parseMove()" --> B["Strongly Typed Enum<br/>Move::R, Move::U_PRIME"]
+    B -- "moveToString()" --> A
+```
+
+---
+
+### 11.2 Concept: C++ Namespaces (`namespace Notation`)
+
+#### The Problem: Global Namespace Pollution & Name Collisions
+In C and older procedural programming, functions like `print()` or `parse()` lived in the global scope. If two libraries or files declare a function with the same name and signature, the linker fails with a fatal `multiple definition` collision.
+
+#### The Solution: Namespaces as Labeled Folders
+A `namespace` acts like a family surname or folder for identifiers:
+```cpp
+namespace Notation {
+    Move parseMove(std::string_view token);
+    std::string_view moveToString(Move move) noexcept;
+}
+```
+Outside the namespace, functions are accessed using the **scope resolution operator (`::`)**:
+```cpp
+Notation::parseMove("R");
+```
+* **Real-World Analogy**: In a classroom with multiple students named "John", referring to `Smith::John` vs `Doe::John` completely avoids ambiguity.
+
+#### Why `namespace` instead of a `class`?
+In Java or C#, every function must belong to a class, forcing developers to write dummy classes full of `static` methods (e.g. `public class NotationUtils { public static ... }`).
+In idiomatic C++:
+* A `class` is reserved for entities that hold **state** (like `Cube` encapsulating its 54 stickers).
+* Independent functions that do not maintain state are called **free functions**.
+* Free functions belong in a `namespace`, eliminating unnecessary class boilerplate, fake constructors, and `static` prefixes.
+
+---
+
+### 11.3 Concept: Zero-Allocation String Slicing (`std::string_view`)
+
+#### The Problem with `const std::string&`
+In older C++, string-accepting functions were typically written as:
+```cpp
+Move parseMove(const std::string& token);
+```
+When called with a string literal like `parseMove("R2")`:
+1. `"R2"` is a static character array stored in the program's read-only binary section.
+2. Because the parameter expects a `std::string`, C++ must allocate dynamic heap memory via `malloc`/`new`, copy `"R2\0"` into it, pass that object to the function, and then deallocate the heap memory when the function returns.
+3. Allocating dynamic memory just to inspect two characters causes substantial CPU and memory overhead.
+
+#### The Modern Solution: `std::string_view` (C++17)
+A `std::string_view` is **not** a string; it is a lightweight, non-owning **window** into characters that already exist in memory.
+
+Under the hood, `std::string_view` is composed of only two values (16 bytes total on a 64-bit architecture):
+```cpp
+struct string_view {
+    const char* data;    // 8 bytes: pointer to the first character
+    std::size_t length;  // 8 bytes: number of characters in the view
+};
+```
+
+```text
+Program Memory (Read-Only Binary):
+Address: 0x1000   0x1001   0x1002
+Chars:   [ 'R' ]  [ '2' ]  [ '\0' ]
+           ▲
+           │
+           │ (pointer: 0x1000)
+┌──────────┴────────────┐
+│   std::string_view    │
+│  data:   0x1000       │
+│  length: 2            │  --> Total size: 16 bytes. ZERO heap allocation!
+└───────────────────────┘
+```
+
+#### Real-World Metaphor:
+| Type | Metaphor | Memory Behavior |
+| :--- | :--- | :--- |
+| **`std::string`** | **Buying a book** | You own the paper. To inspect a sentence, you photocopy it and store it in your house (allocates memory). |
+| **`std::string_view`** | **A magnifying glass** | You don't own the paper. You simply hover your magnifying glass over existing text. Zero copies made. |
+
+#### Versatility: What can `std::string_view` view?
+```cpp
+// 1. String literal (Zero copy, 0 heap bytes):
+Notation::parseMove("U'");
+
+// 2. An existing std::string (Zero copy):
+std::string input = "F2";
+Notation::parseMove(input);
+
+// 3. A sub-slice of a larger string (Zero copy):
+std::string_view algorithm = "R U R' U'";
+std::string_view firstMove = algorithm.substr(0, 1); // views "R", no heap allocation!
+```
+
+#### The Golden Rule: Non-Owning Lifetimes
+Because `std::string_view` does **not** own the underlying characters, the viewed data must remain alive as long as the view is in use. Returning a `std::string_view` to a destroyed local `std::string` creates a dangling pointer (undefined behavior). In contrast, returning a view to a static string literal (`"R2"`) is 100% safe because string literals exist for the entire lifetime of the program.
+
+---
+
+### 11.4 Concept: The `noexcept` Optimization Guarantee
+
+In C++, **`noexcept`** stands for **"no exceptions"**. When attached to a function declaration, it represents a strict contractual promise made to both the compiler and callers:
+
+> *"I guarantee that this function will NEVER throw an exception under any circumstance."*
+
+#### 1. Why `moveToString` is marked `noexcept`
+```cpp
+std::string_view moveToString(Move move) noexcept {
+  switch (move) {
+    case Move::U: return "U";
+    case Move::U_PRIME: return "U'";
+    // ...
+  }
+  return "";
+}
+```
+* **No dynamic allocations**: It never calls `malloc`/`new` (cannot throw `std::bad_alloc`).
+* **No I/O or system calls**: It doesn't read files, access networks, or interact with hardware.
+* **Pure static mapping**: It simply branches on an integer and returns a pointer to a string literal already embedded in the binary's read-only memory segment. It is mathematically and logically impossible for this code to fail.
+
+#### 2. Contrast: Why `parseMove` is NOT `noexcept`
+```cpp
+// CAN throw! If given invalid input like "XYZ", it throws std::invalid_argument
+Move parseMove(std::string_view token); 
+
+// CANNOT throw! It simply maps a valid enum to a hardcoded string literal
+std::string_view moveToString(Move move) noexcept;
+```
+
+#### 3. How `noexcept` Optimizes Code (Stack Unwinding Elimination)
+Normally, when compiling a function call, the compiler generates hidden **exception unwinding tables** to allow the runtime to unwind the stack and destroy local variables if an exception propagates:
+
+```text
+Standard Function Call:
+Call Function ───► [ Setup Stack Unwinding Tables ]
+                   [ In case an exception is thrown, be prepared to clean up ]
+
+noexcept Function Call:
+Call Function ───► [ Direct CPU Execution: Zero overhead, no cleanup tables needed ]
+```
+
+* **Binary Size**: Eliminating exception tables reduces the executable binary footprint.
+* **Performance**: The CPU avoids setup instructions and branch penalties.
+* **Standard Library Acceleration**: Containers like `std::vector` check `std::is_nothrow_move_constructible`. If operations are `noexcept`, `std::vector` moves elements in $O(1)$ during buffer reallocations instead of making expensive copies.
+
+#### 4. The Violation Consequence: `std::terminate()`
+If a function marked `noexcept` ever attempts to throw an exception, C++ treats this as an unrecoverable contract violation. The runtime bypasses all exception handlers and immediately invokes `std::terminate()`, safely aborting the application.
+
+#### 5. Comparison Summary
+
+| Specifier | Contract | Behavior on Error | Example in Rubik's Solver |
+| :--- | :--- | :--- | :--- |
+| *(default)* | May throw exceptions on failure | Propagates exception up call stack to matching `catch` block | `Notation::parseMove("INVALID")` $\to$ throws `std::invalid_argument` |
+| **`noexcept`** | Guaranteed never to throw | Immediate program abort via `std::terminate()` if violated | `Notation::moveToString(Move::U)` $\to$ returns `"U"` with 0 overhead |
+
+
+
 
 
 
