@@ -517,6 +517,84 @@ In Rubik's Cube group theory, repeating the 4-move algorithm $(R \; U \; R' \; U
 $$\mathbf{(R \; U \; R' \; U')^6 = Identity}$$
 Applying the sequence 6 times restores all 54 stickers to their pristine solved state!
 
+---
+
+## 10. C++ Compilation Model: Transitive Inclusion & `inline constexpr`
+
+### 10.1 What is Transitive Inclusion?
+In C++, an `#include` directive instructs the preprocessor to **literally copy-and-paste** the contents of the target header file directly into the including file before compilation begins.
+
+When header $A$ includes header $B$, and source file $C$ includes header $A$, file $C$ automatically receives the contents of header $B$. This is called **Transitive Inclusion** (or Indirect Inclusion):
+
+```text
+               ┌────────────────┐
+               │    Move.hpp    │  (Defines: Move enum & MoveCount)
+               └───────┬────────┘
+                       │ included by (direct)
+                       ▼
+               ┌────────────────┐
+               │    Cube.hpp    │  (Line 10: #include "Move.hpp")
+               └───────┬────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │ transitive   │ transitive   │ transitive
+        ▼              ▼              ▼
+ ┌──────────────┐ ┌──────────┐ ┌───────────────┐
+ │   Cube.cpp   │ │ main.cpp │ │ CubeTests.cpp │
+ └──────────────┘ └──────────┘ └───────────────┘
+```
+
+Because `Cube.hpp` includes `"Move.hpp"`, any source file that includes `Cube.hpp` (`Cube.cpp`, `main.cpp`, `CubeTests.cpp`) automatically has access to `enum class Move` and `MoveCount` without needing to write `#include "Move.hpp"` directly.
+
+---
+
+### 10.2 Translation Units & The One Definition Rule (ODR)
+
+C++ compiles source code in two distinct phases:
+
+#### Phase 1: Separate Compilation of Translation Units (TUs)
+A **Translation Unit** is a single `.cpp` file combined with the full text of all headers it includes.
+The compiler compiles each TU completely independently in isolation into an object file:
+* `src/Cube.cpp` $\longrightarrow$ `Cube.cpp.obj`
+* `tests/CubeTests.cpp` $\longrightarrow$ `CubeTests.cpp.obj`
+* `src/main.cpp` $\longrightarrow$ `main.cpp.obj`
+
+#### Phase 2: Linking into the Executable
+The **Linker** takes all `.obj` files and connects function calls to their addresses.
+
+#### The ODR Hazard:
+If a variable is defined in a header without `inline` (e.g., `constexpr std::size_t MoveCount = 18;` in C++14 or older, or a non-const global `int x = 18;`):
+* Both `Cube.cpp.obj` and `CubeTests.cpp.obj` receive an independent definition of that variable.
+* When the linker combines them into `cube_tests.exe`, it detects multiple definitions of the same symbol and throws a fatal linker error:
+  ```text
+  fatal error LNK2005 / multiple definition of 'MoveCount'
+  ```
+
+---
+
+### 10.3 Anatomy of `inline constexpr std::size_t MoveCount = 18;`
+
+To eliminate linker errors and guarantee optimal performance, modern C++17 introduced **Inline Variables**:
+
+```text
+ inline    constexpr    std::size_t    MoveCount    =    18 ;
+   │           │             │             │              │
+   │           │             │             │              └── 6 faces × 3 turns = 18 moves
+   │           │             │             └── Descriptive constant name
+   │           │             └── Standard unsigned integer (counts can never be negative)
+   │           │
+   │           └── Compile-time evaluation (zero runtime CPU overhead)
+   └── Inline variable (C++17): Merges duplicate definitions across multiple .obj files
+```
+
+| Keyword | Role in Architecture |
+| :--- | :--- |
+| **`inline`** | Informs the Linker: *"Even though multiple `.obj` files compiled their own copy of `MoveCount`, they represent the exact same entity. Merge them into a single global symbol."* |
+| **`constexpr`** | Evaluates the constant during compilation. The value `18` is inlined directly into CPU assembly instructions with zero runtime calculation overhead. |
+| **`std::size_t`** | The native unsigned integer type for counts, sizes, and array bounds (defined in `<cstddef>`). Prevents invalid negative values. |
+| **`= 18;`** | The standard WCA Half-Turn Metric (HTM): 6 faces $\times$ 3 turns ($90^\circ$ clockwise, $90^\circ$ counter-clockwise, $180^\circ$ double) = 18 discrete moves. |
+
+
 
 
 

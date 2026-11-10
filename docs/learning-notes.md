@@ -32,4 +32,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Face rotation matrix formula $(r, c) \to (c, 2 - r)$ and adjacent rim permutations for all 6 faces ($F, U, R, L, D, B$)
    - Inspection methods (`isSolved()`, `.at()` bounds safety, `print()`, C++20 `operator==`)
    - Counter-clockwise (prime) turns via the DRY principle ($X' = X^3$)
+   - Double (half-turn) moves as group involutions ($(X2)^2 = I$) and opposite face commutativity
    - Deep-dive into Identity state ($I$), official WCA move notation, and group cancellation proofs ($X \cdot X' = I$)
+   - Move representation enum (`enum class Move : std::uint8_t`) and O(1) jump-table dispatcher (`Cube::apply`)
+   - C++ compilation model: Transitive Inclusion, Translation Units, and `inline constexpr` (C++17 ODR rules)
