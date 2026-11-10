@@ -578,6 +578,64 @@ for (std::size_t i = 0; i < MoveCount; ++i) {
 ```
 - **Verifies**: `Notation::parseMove` safely rejects invalid faces, unsupported modifiers, empty strings, and long tokens by throwing `std::invalid_argument`.
 
+### Test 67: Algorithm Parsing with Arbitrary Whitespace
+```cpp
+const auto parsedMoves = Notation::parseAlgorithm("  R   U  R'   U'  \n F2  \t D2 ");
+assert(parsedMoves.size() == 6);
+```
+- **Verifies**: `Notation::parseAlgorithm` cleanly extracts tokens separated by variable spaces, tabs, and newlines without heap allocations during scanning.
+
+### Test 68: Round-Trip Canonical Formatting (`formatAlgorithm`)
+```cpp
+const std::string formatted = Notation::formatAlgorithm(parsedMoves);
+assert(formatted == "R U R' U' F2 D2");
+assert(Notation::parseAlgorithm(formatted) == parsedMoves);
+```
+- **Verifies**: `Notation::formatAlgorithm` produces canonical space-separated WCA notation without leading or trailing spaces, proving `parse(format(moves)) == moves`.
+
+### Test 69: Batch Move Sequence Execution (`Cube::apply(vector<Move>)`)
+```cpp
+Cube vectorCube;
+vectorCube.apply(parsedMoves);
+assert(vectorCube == directCube);
+```
+- **Verifies**: Tier 2 `Cube::apply(const std::vector<Move>&)` sequentially applies all moves, producing an identical state to manual member function calls.
+
+### Test 70: String Facade Execution (`Cube::apply(string_view)`)
+```cpp
+Cube stringCube;
+stringCube.apply("R U R' U' F2 D2");
+assert(stringCube == vectorCube);
+```
+- **Verifies**: Tier 3 `Cube::apply(std::string_view)` delegates cleanly to Tier 2, producing identical states from raw algorithm text.
+
+### Test 71: The Sexy Move 6-Cycle via Facade ($(R \; U \; R' \; U')^6 = I$)
+```cpp
+Cube sexyStringCube;
+for (int i = 0; i < 6; ++i) {
+  sexyStringCube.apply("R U R' U'");
+}
+assert(sexyStringCube == originalCube);
+```
+- **Verifies**: Repeating the 4-move string algorithm 6 times restores the solved cube state.
+
+### Test 72: T-Permutation PLL Involution ($(T\text{-Perm})^2 = I$)
+```cpp
+Cube tPermCube;
+constexpr std::string_view tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
+tPermCube.apply(tPerm);
+assert(tPermCube != originalCube); // First application scrambles
+tPermCube.apply(tPerm);
+assert(tPermCube == originalCube); // Second application restores identity
+```
+- **Verifies**: The 14-move T-Permutation consists of two disjoint 2-cycles (corner swap and edge swap). Its group order is $\operatorname{lcm}(2, 2) = 2$, so applying it twice restores the identity cube state.
+
+### Test 73: Algorithm Exception Handling for Malformed Tokens
+```cpp
+// Throws std::invalid_argument when parsing "R U INVALID U'"
+```
+- **Verifies**: `Notation::parseAlgorithm` fails fast and throws `std::invalid_argument` if any token in a multi-move sequence is malformed.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -659,6 +717,12 @@ PASS: Six repetitions of (R U R' U') restore identity ((R U R' U')^6 = I).
 PASS: parseMove correctly parses all 18 WCA move tokens.
 PASS: moveToString correctly formats all 18 moves and round-trips.
 PASS: parseMove throws std::invalid_argument on malformed tokens.
-```
+PASS: parseAlgorithm correctly parses sequences with variable whitespace.
+PASS: formatAlgorithm produces canonical string and round-trips.
+PASS: apply(const std::vector<Move>&) correctly matches individual rotations.
+PASS: apply(std::string_view) produces identical state to vector apply.
+PASS: Six repetitions of apply("R U R' U'") restore identity ((R U R' U')^6 = I).
+PASS: Two repetitions of T-Permutation restore identity ((T-Perm)^2 = I).
+PASS: parseAlgorithm throws std::invalid_argument on malformed algorithm string.
 ```
 

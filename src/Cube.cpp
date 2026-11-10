@@ -1,4 +1,5 @@
 #include "Cube.hpp"
+#include "Notation.hpp"
 #include <iostream>
 
 // =============================================================================
@@ -391,6 +392,16 @@ void Cube::apply(Move move) {
   case Move::R_PRIME: rotateRightCounterClockwise(); break;
   case Move::R2: rotateRightDouble(); break;
   }
+}
+
+void Cube::apply(const std::vector<Move>& moves) {
+  for (const Move move : moves) {
+    apply(move);
+  }
+}
+
+void Cube::apply(std::string_view algorithm) {
+  apply(Notation::parseAlgorithm(algorithm));
 }
 
 void Cube::rotateFaceClockwise(std::size_t face) {

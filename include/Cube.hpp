@@ -6,6 +6,8 @@
 
 #include <array>
 #include <cstddef>
+#include <string_view>
+#include <vector>
 
 #include "Move.hpp"
 
@@ -169,6 +171,13 @@ public:
   // -------------------------------------------------------------------------
   // Applies any standard WCA move (Clockwise, Prime, or Double) to the cube.
   void apply(Move move);
+
+  // Applies an ordered sequence of standard WCA moves to the cube.
+  void apply(const std::vector<Move>& moves);
+
+  // Parses and executes a space-separated WCA algorithm string (e.g. "R U R' U'").
+  // Throws std::invalid_argument if any token in the algorithm string is malformed.
+  void apply(std::string_view algorithm);
 
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->

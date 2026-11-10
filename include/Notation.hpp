@@ -2,7 +2,9 @@
 #define NOTATION_HPP
 
 #include "Move.hpp"
+#include <string>
 #include <string_view>
+#include <vector>
 
 // =============================================================================
 // Namespace: Notation
@@ -20,6 +22,14 @@ Move parseMove(std::string_view token);
 // - Returns a string_view pointing to static compile-time storage (zero heap allocation).
 // - Marked noexcept because converting a valid enum to a string literal cannot fail.
 std::string_view moveToString(Move move) noexcept;
+
+// Parses a space-separated sequence of WCA moves (e.g. "R U R' U'") into a vector of Move enums.
+// - Robust against variable whitespace (leading/trailing spaces, multiple spaces, tabs, newlines).
+// - Throws std::invalid_argument if any token in the algorithm sequence is malformed.
+std::vector<Move> parseAlgorithm(std::string_view alg);
+
+// Formats a sequence of Move enums back into standard space-separated WCA notation (e.g. "R U R' U'").
+std::string formatAlgorithm(const std::vector<Move>& moves);
 
 } // namespace Notation
 

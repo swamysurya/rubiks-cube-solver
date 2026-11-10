@@ -674,5 +674,87 @@ int main() {
   std::cout
       << "PASS: parseMove throws std::invalid_argument on malformed tokens.\n";
 
+  // =========================================================================
+  // 12. Algorithm Parsing, Formatting & Execution Tests
+  // =========================================================================
+
+  // Test 67: parseAlgorithm parses standard sequence with messy whitespace
+  const auto parsedMoves =
+      Notation::parseAlgorithm("  R   U  R'   U'  \n F2  \t D2 ");
+  assert(parsedMoves.size() == 6);
+  assert(parsedMoves[0] == Move::R);
+  assert(parsedMoves[1] == Move::U);
+  assert(parsedMoves[2] == Move::R_PRIME);
+  assert(parsedMoves[3] == Move::U_PRIME);
+  assert(parsedMoves[4] == Move::F2);
+  assert(parsedMoves[5] == Move::D2);
+  std::cout << "PASS: parseAlgorithm correctly parses sequences with variable "
+               "whitespace.\n";
+
+  // Test 68: formatAlgorithm produces canonical WCA string and round-trips
+  const std::string formattedAlg = Notation::formatAlgorithm(parsedMoves);
+  assert(formattedAlg == "R U R' U' F2 D2");
+  assert(Notation::parseAlgorithm(formattedAlg) == parsedMoves);
+  std::cout
+      << "PASS: formatAlgorithm produces canonical string and round-trips.\n";
+
+  // Test 69: apply(const std::vector<Move>&) matches individual member
+  // rotations
+  Cube directCube;
+  directCube.rotateRightClockwise();
+  directCube.rotateUpClockwise();
+  directCube.rotateRightCounterClockwise();
+  directCube.rotateUpCounterClockwise();
+  directCube.rotateFrontDouble();
+  directCube.rotateDownDouble();
+
+  Cube vectorCube;
+  vectorCube.apply(parsedMoves);
+  assert(vectorCube == directCube);
+  std::cout << "PASS: apply(const std::vector<Move>&) correctly matches "
+               "individual rotations.\n";
+
+  // Test 70: apply(std::string_view) matches vector application
+  Cube stringCube;
+  stringCube.apply("R U R' U' F2 D2");
+  assert(stringCube == vectorCube);
+  std::cout << "PASS: apply(std::string_view) produces identical state to "
+               "vector apply.\n";
+
+  // Test 71: The Sexy Move 6-Cycle via string algorithm: (R U R' U')^6 =
+  // Identity
+  Cube sexyStringCube;
+  for (int i = 0; i < 6; ++i) {
+    sexyStringCube.apply("R U R' U'");
+  }
+  assert(sexyStringCube == originalCube);
+  std::cout << "PASS: Six repetitions of apply(\"R U R' U'\") restore identity "
+               "((R U R' U')^6 = I).\n";
+
+  // Test 72: T-Permutation Involution: (T-Perm)^2 = Identity
+  // The classic PLL T-Permutation swaps 2 corners (UFR <-> UBR) and 2 edges (UR
+  // <-> UL). Being a product of two disjoint 2-cycles, its group order is
+  // lcm(2, 2) = 2.
+  Cube tPermCube;
+  constexpr std::string_view tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
+  tPermCube.apply(tPerm);
+  assert(tPermCube != originalCube);
+  tPermCube.apply(tPerm);
+  assert(tPermCube == originalCube);
+  std::cout << "PASS: Two repetitions of T-Permutation restore identity "
+               "((T-Perm)^2 = I).\n";
+
+  // Test 73: parseAlgorithm throws std::invalid_argument on malformed algorithm
+  // strings
+  bool caughtInvalidInAlg = false;
+  try {
+    Notation::parseAlgorithm("R U INVALID U'");
+  } catch (const std::invalid_argument &) {
+    caughtInvalidInAlg = true;
+  }
+  assert(caughtInvalidInAlg);
+  std::cout << "PASS: parseAlgorithm throws std::invalid_argument on malformed "
+               "algorithm string.\n";
+
   return 0;
 }

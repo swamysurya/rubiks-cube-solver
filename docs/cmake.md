@@ -205,3 +205,64 @@ git push origin main
   ```powershell
   winget list --id Kitware.CMake
   ```
+
+---
+
+## 9. Incremental Compilation: Why Subsequent Builds Are Faster
+
+### 9.1 The Observation
+The first time you run `cmake --build build`, every `.cpp` file is compiled and linked. On subsequent runs — especially when only one or two files have changed — the build finishes dramatically faster.
+
+### 9.2 How It Works: Timestamp-Based Dependency Tracking
+The build tool (MinGW Make or Ninja) maintains an internal **Dependency Graph** mapping each source file to its compiled object file. Before compiling any file, it compares file modification timestamps:
+
+```text
+Is  LastModified(CubeTests.cpp)  >  LastModified(CubeTests.cpp.obj) ?
+      ├── YES ──► Source is newer than its object file. Recompile it.
+
+Is  LastModified(main.cpp)       >  LastModified(main.cpp.obj) ?
+      └── NO  ──► Object file is up to date. Skip entirely.
+```
+
+If a source file has not been modified since its `.obj` was last generated, recompiling it would produce a byte-for-byte identical result. Skipping it saves CPU time.
+
+### 9.3 Proof from Build Logs
+
+#### Full Build (All files modified or first build):
+```text
+[ 12%] Building CXX object CMakeFiles/rubiks_solver.dir/src/main.cpp.obj
+[ 25%] Building CXX object CMakeFiles/rubiks_solver.dir/src/Cube.cpp.obj
+[ 37%] Building CXX object CMakeFiles/rubiks_solver.dir/src/Notation.cpp.obj
+[ 50%] Linking CXX executable rubiks_solver.exe
+[ 62%] Building CXX object CMakeFiles/cube_tests.dir/tests/CubeTests.cpp.obj
+[ 75%] Building CXX object CMakeFiles/cube_tests.dir/src/Cube.cpp.obj
+[ 87%] Building CXX object CMakeFiles/cube_tests.dir/src/Notation.cpp.obj
+[100%] Linking CXX executable cube_tests.exe
+```
+*6 compilations + 2 link steps.*
+
+#### Incremental Build (Only `CubeTests.cpp` modified):
+```text
+[ 50%] Built target rubiks_solver          <── SKIPPED! (already up to date)
+[ 62%] Building CXX object CMakeFiles/cube_tests.dir/tests/CubeTests.cpp.obj
+[ 75%] Linking CXX executable cube_tests.exe
+[100%] Built target cube_tests
+```
+*Only 1 compilation + 1 link step. The entire `rubiks_solver` target was skipped.*
+
+### 9.4 Why Header Changes Are Slower Than Source Changes
+The build system also tracks `#include` dependencies:
+- **Editing a `.cpp` file** (e.g. `tests/CubeTests.cpp`): Only that single `.obj` is recompiled.
+- **Editing a `.hpp` file** (e.g. `include/Cube.hpp`): Because `Cube.hpp` is `#include`-d by `Cube.cpp`, `main.cpp`, and `CubeTests.cpp` (transitive inclusion), the build system marks all three as stale and recompiles all of them.
+
+This is why keeping headers minimal and stable is an important C++ design discipline.
+
+### 9.5 OS-Level RAM Caching
+On the first build, the operating system loads the compiler binary (`g++.exe`), standard library headers (`<iostream>`, `<vector>`, `<string_view>`), and project files from disk into RAM. On subsequent builds, these files remain in the OS file cache (hot memory), reducing disk I/O latency to near zero.
+
+### 9.6 Summary
+
+| Build Type | What Gets Compiled | When to Use |
+| :--- | :--- | :--- |
+| **Clean Build** (`cmake --build build --clean-first`) | Every file in the project | After major toolchain changes or suspected build corruption |
+| **Incremental Build** (`cmake --build build`) | **Only the files modified** since the last build | Normal development workflow (default) |

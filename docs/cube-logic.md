@@ -757,6 +757,225 @@ If a function marked `noexcept` ever attempts to throw an exception, C++ treats 
 | *(default)* | May throw exceptions on failure | Propagates exception up call stack to matching `catch` block | `Notation::parseMove("INVALID")` $\to$ throws `std::invalid_argument` |
 | **`noexcept`** | Guaranteed never to throw | Immediate program abort via `std::terminate()` if violated | `Notation::moveToString(Move::U)` $\to$ returns `"U"` with 0 overhead |
 
+---
+
+### 11.5 Algorithm Parsing & Formatting Logic (`parseAlgorithm` & `formatAlgorithm`)
+
+#### 11.5.1 Group Theory: Words and Generators
+In abstract algebra and group theory:
+- The 18 standard moves form the set of **generators** for the Rubik's Cube group $\mathcal{G}$:
+  $$\mathcal{S} = \{U, D, F, B, L, R, U', D', \dots, R2\}$$
+- Any sequence of turns applied to the cube is a **word** formed by concatenating generators:
+  $$W = g_1 \cdot g_2 \cdot g_3 \cdots g_k \quad (g_i \in \mathcal{S})$$
+- The number of moves $k$ is the word's **HTM length** (Half-Turn Metric).
+- In speedcubing and competitive scrambles, move sequences are represented as space-delimited text containing variable whitespace, tabs, and newlines.
+
+---
+
+#### 11.5.2 `parseAlgorithm`: Zero-Allocation Tokenization
+
+```cpp
+std::vector<Move> parseAlgorithm(std::string_view alg) {
+  std::vector<Move> moves;
+  constexpr std::string_view delimiters = " \t\n\r";
+
+  std::size_t start = alg.find_first_not_of(delimiters);
+  while (start != std::string_view::npos) {
+    const std::size_t end = alg.find_first_of(delimiters, start);
+    const std::string_view token = (end == std::string_view::npos)
+                                       ? alg.substr(start)
+                                       : alg.substr(start, end - start);
+    moves.push_back(parseMove(token));
+    start = alg.find_first_not_of(delimiters, end);
+  }
+
+  return moves;
+}
+```
+
+##### Line-by-Line Mechanics:
+1. **Delimiters**: `constexpr std::string_view delimiters = " \t\n\r";`
+   - Defines whitespace characters: space, tab (`\t`), newline (`\n`), and carriage return (`\r`).
+   - Evaluated at compile time with zero runtime allocation.
+2. **Skipping Leading Whitespace**: `std::size_t start = alg.find_first_not_of(delimiters);`
+   - Scans forward until reaching a non-whitespace character.
+   - If the input is empty or pure whitespace, returns `std::string_view::npos` and skips the loop entirely.
+3. **Finding Word Boundaries**: `const std::size_t end = alg.find_first_of(delimiters, start);`
+   - Searches forward from `start` for the next whitespace character, marking the end boundary of the current token.
+4. **Zero-Allocation Slicing**:
+   - `alg.substr(start, end - start)` constructs a 16-byte `std::string_view` (pointer + size) pointing directly at existing memory. No dynamic heap allocation occurs during scanning.
+   - If `end == std::string_view::npos`, this is the final token in the string without trailing whitespace, handled cleanly by taking `alg.substr(start)`.
+5. **Token Delegation & Error Handling**:
+   - Calls `parseMove(token)`, which validates the token and converts it to a 1-byte `Move` enum.
+   - If an invalid token occurs (e.g. `"R U BAD U'"`), `parseMove` throws `std::invalid_argument` immediately, safely halting execution without corrupting data structures.
+6. **Advancing**: `start = alg.find_first_not_of(delimiters, end);`
+   - Jumps past all consecutive whitespace characters after the current word to locate the start of the next token.
+
+##### Visual Execution Trace: Parsing `"  R   U2 "`
+```text
+Full String:   [ ' ' ][ ' ' ][ 'R' ][ ' ' ][ ' ' ][ ' ' ][ 'U' ][ '2' ][ ' ' ]
+Index:            0      1      2      3      4      5      6      7      8
+
+--- Iteration 1 ---
+1. start = alg.find_first_not_of(" ")  ==> 2 (points to 'R')
+2. end   = alg.find_first_of(" ", 2)   ==> 3 (points to space at index 3)
+3. token = alg.substr(2, 3 - 2 = 1)    ==> "R"
+4. parseMove("R")                      ==> moves.push_back(Move::R)
+5. start = alg.find_first_not_of(" ", 3) ==> 6 (skips spaces, points to 'U')
+
+--- Iteration 2 ---
+1. start                               ==> 6 (points to 'U')
+2. end   = alg.find_first_of(" ", 6)   ==> 8 (points to space at index 8)
+3. token = alg.substr(6, 8 - 6 = 2)    ==> "U2"
+4. parseMove("U2")                     ==> moves.push_back(Move::U2)
+5. start = alg.find_first_not_of(" ", 8) ==> npos (no more characters!)
+
+--- Result ---
+std::vector<Move> { Move::R, Move::U2 }
+```
+
+---
+
+#### 11.5.3 `formatAlgorithm`: The Fencepost Solution
+
+```cpp
+std::string formatAlgorithm(const std::vector<Move>& moves) {
+  std::string result;
+  for (std::size_t i = 0; i < moves.size(); ++i) {
+    if (i > 0) {
+      result += ' ';
+    }
+    result += moveToString(moves[i]);
+  }
+  return result;
+}
+```
+
+##### The Classic "Fencepost Problem":
+When constructing delimited text for $N$ items, exactly $N - 1$ separators are needed between them:
+```text
+[Move 0] ──space── [Move 1] ──space── [Move 2] ──space── [Move 3]
+```
+Appending a space after every item naively creates an unwanted trailing space (`"R U R' U' "`).
+
+##### The Solution:
+- For the first element (`i == 0`): `i > 0` is `false`, so no space is added before the first move (`result = "R"`).
+- For subsequent elements (`i >= 1`): `i > 0` is `true`, prepending a single space before appending the formatted move (`result = "R U"`).
+- Guarantees **zero leading spaces** and **zero trailing spaces**.
+
+---
+
+### 11.6 The 3-Tier Facade Pattern & Overload Resolution (`Cube::apply`)
+
+#### 11.6.1 What is the Facade Pattern?
+In real-world architecture, a **facade** is the exterior front of a building that presents an elegant, simple appearance while hiding the complex plumbing, electrical wiring, and HVAC ductwork inside.
+
+In software engineering (from the Gang of Four *Design Patterns*), the **Facade Pattern** provides a simple, high-level interface that shields callers from complex underlying multi-step subsystems:
+- **Without Facade** (Verbose & error-prone):
+  ```cpp
+  std::vector<Move> moves = Notation::parseAlgorithm("R U R' U'");
+  for (const Move m : moves) {
+      cube.apply(m);
+  }
+  ```
+- **With Facade** (Clean & expressive):
+  ```cpp
+  cube.apply("R U R' U'");
+  ```
+The caller does not need to manage string tokenizers, whitespace delimiters, vector allocations, or jump tables.
+
+---
+
+#### 11.6.2 The 3-Tier Architectural Hierarchy
+
+The `apply()` API on `Cube` is structured into three clear levels of abstraction:
+
+```text
+▲ High Abstraction (Easiest for Humans & High-Level Code)
+│
+├── Tier 3: void Cube::apply(std::string_view algorithm);
+│   • Input: Human WCA text (e.g. "R U R' U'")
+│   • Role: User-facing Facade (parses text -> delegates vector to Tier 2)
+│
+├── Tier 2: void Cube::apply(const std::vector<Move>& moves);
+│   • Input: Sequence of Move enums (std::vector<Move>)
+│   • Role: Batch Executor (iterates moves -> delegates each to Tier 1)
+│
+└── Tier 1: void Cube::apply(Move move);
+    • Input: Single 1-byte enum (Move::R)
+    • Role: Atomic Hardware Dispatcher (O(1) switch jump table)
+│
+▼ Low Abstraction (Closest to CPU Hardware)
+```
+
+##### Professional Engineering Benefits:
+1. **Zero Code Duplication (DRY Principle)**:
+   Tier 3 delegates to Tier 2; Tier 2 delegates to Tier 1. The loop is written only once, and the face rotation dispatch is written only once.
+2. **Right Tool for the Right Job**:
+   - **Humans & Tests**: Use Tier 3 (`cube.apply("R U R' U'")`) for readable code.
+   - **Solver Solution Applicator**: Uses Tier 2 (`cube.apply(solution)`).
+   - **AI Search Solvers (Kociemba / IDA*)**: Use Tier 1 (`cube.apply(Move::R)`) directly to evaluate millions of nodes per second with **zero string parsing overhead**.
+
+---
+
+#### 11.6.3 Overload Resolution: Which `apply()` is Called?
+
+In `src/Cube.cpp`:
+```cpp
+void Cube::apply(std::string_view algorithm) {
+  apply(Notation::parseAlgorithm(algorithm));
+}
+```
+
+##### Resolution Analysis:
+1. `Notation::parseAlgorithm(algorithm)` has the signature:
+   ```cpp
+   std::vector<Move> parseAlgorithm(std::string_view alg);
+   ```
+   It returns a **`std::vector<Move>`** value.
+2. The compiler must resolve the call:
+   ```cpp
+   apply( /* argument of type std::vector<Move> */ );
+   ```
+3. C++ overload resolution matches against all available `Cube::apply` candidates:
+
+| Candidate Signature | Parameter Type | Match Status |
+| :--- | :--- | :--- |
+| `void apply(Move move);` | `Move` (enum) | ❌ Incompatible type |
+| `void apply(std::string_view algorithm);` | `std::string_view` | ❌ Incompatible type |
+| **`void apply(const std::vector<Move>& moves);`** | **`const std::vector<Move>&`** | **✅ EXACT MATCH** |
+
+The call resolves unambiguously to **Tier 2: `Cube::apply(const std::vector<Move>&)`**.
+
+---
+
+#### 11.6.4 The Complete Execution Call Chain (Sequence Diagram)
+
+When executing `cube.apply("R U")`:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Tier3 as Tier 3: apply(string_view)
+    participant Parser as Notation::parseAlgorithm
+    participant Tier2 as Tier 2: apply(vector<Move>)
+    participant Tier1 as Tier 1: apply(Move)
+    participant Engine as rotateRightClockwise()
+
+    User->>Tier3: cube.apply("R U")
+    Tier3->>Parser: parseAlgorithm("R U")
+    Parser-->>Tier3: returns vector { Move::R, Move::U }
+    Tier3->>Tier2: apply(vector)
+    loop for each move in vector
+        Tier2->>Tier1: apply(Move::R)
+        Tier1->>Engine: rotateRightClockwise()
+        Tier2->>Tier1: apply(Move::U)
+        Tier1->>Engine: rotateUpClockwise()
+    end
+```
+
+
+
 
 
 

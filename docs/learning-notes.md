@@ -19,6 +19,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - `CMakeLists.txt` full walkthrough (C++20 standard, warnings, include directories)
    - Why two separate executables exist (`rubiks_solver` vs `cube_tests`)
    - Build commands and Windows environment troubleshooting
+   - Incremental Compilation: timestamp-based dependency tracking, header vs. source change impact, and OS-level RAM caching
 
 3. 📂 **[Testing & CTest Notes](testing.md)**
    - Testing invariants and regression prevention
@@ -37,3 +38,5 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Move representation enum (`enum class Move : std::uint8_t`) and O(1) jump-table dispatcher (`Cube::apply`)
    - C++ compilation model: Transitive Inclusion, Translation Units, and `inline constexpr` (C++17 ODR rules)
    - WCA notation interface (`Notation.hpp`): C++ Namespaces vs Classes, zero-allocation `std::string_view` (memory layout & non-owning lifetimes), and `noexcept` guarantees
+   - Algorithm parsing & formatting: Words and generators in group theory, zero-allocation whitespace tokenization (`find_first_not_of` / `find_first_of`), and the Fencepost problem solution
+   - 3-Tier Facade Architecture & Overload Resolution: API layering (`apply(Move)` vs `apply(vector)` vs `apply(string_view)`), C++ type deduction, and sequence execution flow
