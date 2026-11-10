@@ -549,6 +549,35 @@ assert(sexyMoveCube == originalCube);
 ```
 - **Verifies**: Repeating $(R \; U \; R' \; U')$ exactly 6 times restores the solved cube state, verifying group cyclic order.
 
+### Test 64: Token Parsing for All 18 WCA Moves
+```cpp
+assert(Notation::parseMove("U") == Move::U);
+assert(Notation::parseMove("U'") == Move::U_PRIME);
+assert(Notation::parseMove("U2") == Move::U2);
+// ... verifies D, D', D2, F, F', F2, B, B', B2, L, L', L2, R, R', R2
+```
+- **Verifies**: `Notation::parseMove` correctly maps every valid WCA string token to its corresponding `Move` enum.
+
+### Test 65: Bijective Round-Trip Formatting (`moveToString`)
+```cpp
+for (std::size_t i = 0; i < MoveCount; ++i) {
+  const Move m = static_cast<Move>(i);
+  const std::string_view str = Notation::moveToString(m);
+  assert(!str.empty());
+  assert(Notation::parseMove(str) == m);
+}
+```
+- **Verifies**: For all 18 moves, `parseMove(moveToString(m)) == m`, proving the mapping is an exact bijection (one-to-one and invertible).
+
+### Test 66: Error Handling for Malformed Move Tokens
+```cpp
+// Throws std::invalid_argument for unrecognized face "X"
+// Throws std::invalid_argument for invalid modifier "U3"
+// Throws std::invalid_argument for empty string ""
+// Throws std::invalid_argument for overly long token "R2Prime"
+```
+- **Verifies**: `Notation::parseMove` safely rejects invalid faces, unsupported modifiers, empty strings, and long tokens by throwing `std::invalid_argument`.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -627,5 +656,9 @@ PASS: apply(Move::U) produces identical state to rotateUpClockwise().
 PASS: apply(Move::F_PRIME) produces identical state to rotateFrontCounterClockwise().
 PASS: apply(Move::R2) produces identical state to rotateRightDouble().
 PASS: Six repetitions of (R U R' U') restore identity ((R U R' U')^6 = I).
+PASS: parseMove correctly parses all 18 WCA move tokens.
+PASS: moveToString correctly formats all 18 moves and round-trips.
+PASS: parseMove throws std::invalid_argument on malformed tokens.
+```
 ```
 

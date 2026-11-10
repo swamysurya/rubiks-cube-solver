@@ -1,6 +1,8 @@
 #include "Cube.hpp"
+#include "Notation.hpp"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 int main() {
   // =========================================================================
@@ -564,7 +566,8 @@ int main() {
   Cube directU;
   directU.rotateUpClockwise();
   assert(applyU == directU);
-  std::cout << "PASS: apply(Move::U) produces identical state to rotateUpClockwise().\n";
+  std::cout << "PASS: apply(Move::U) produces identical state to "
+               "rotateUpClockwise().\n";
 
   // Test 61: apply(Move::F_PRIME) matches rotateFrontCounterClockwise()
   Cube applyFPrime;
@@ -572,7 +575,8 @@ int main() {
   Cube directFPrime;
   directFPrime.rotateFrontCounterClockwise();
   assert(applyFPrime == directFPrime);
-  std::cout << "PASS: apply(Move::F_PRIME) produces identical state to rotateFrontCounterClockwise().\n";
+  std::cout << "PASS: apply(Move::F_PRIME) produces identical state to "
+               "rotateFrontCounterClockwise().\n";
 
   // Test 62: apply(Move::R2) matches rotateRightDouble()
   Cube applyR2;
@@ -580,7 +584,8 @@ int main() {
   Cube directR2;
   directR2.rotateRightDouble();
   assert(applyR2 == directR2);
-  std::cout << "PASS: apply(Move::R2) produces identical state to rotateRightDouble().\n";
+  std::cout << "PASS: apply(Move::R2) produces identical state to "
+               "rotateRightDouble().\n";
 
   // Test 63: The 6-Cycle "Sexy Move" Invariant: (R U R' U')^6 = Identity
   Cube sexyMoveCube;
@@ -591,7 +596,83 @@ int main() {
     sexyMoveCube.apply(Move::U_PRIME);
   }
   assert(sexyMoveCube == originalCube);
-  std::cout << "PASS: Six repetitions of (R U R' U') restore identity ((R U R' U')^6 = I).\n";
+  std::cout << "PASS: Six repetitions of (R U R' U') restore identity ((R U R' "
+               "U')^6 = I).\n";
+
+  // =========================================================================
+  // 11. WCA Move Notation Parser & Formatter Tests
+  // =========================================================================
+
+  // Test 64: parseMove correctly parses all 18 standard WCA tokens
+  assert(Notation::parseMove("U") == Move::U);
+  assert(Notation::parseMove("U'") == Move::U_PRIME);
+  assert(Notation::parseMove("U2") == Move::U2);
+
+  assert(Notation::parseMove("D") == Move::D);
+  assert(Notation::parseMove("D'") == Move::D_PRIME);
+  assert(Notation::parseMove("D2") == Move::D2);
+
+  assert(Notation::parseMove("F") == Move::F);
+  assert(Notation::parseMove("F'") == Move::F_PRIME);
+  assert(Notation::parseMove("F2") == Move::F2);
+
+  assert(Notation::parseMove("B") == Move::B);
+  assert(Notation::parseMove("B'") == Move::B_PRIME);
+  assert(Notation::parseMove("B2") == Move::B2);
+
+  assert(Notation::parseMove("L") == Move::L);
+  assert(Notation::parseMove("L'") == Move::L_PRIME);
+  assert(Notation::parseMove("L2") == Move::L2);
+
+  assert(Notation::parseMove("R") == Move::R);
+  assert(Notation::parseMove("R'") == Move::R_PRIME);
+  assert(Notation::parseMove("R2") == Move::R2);
+  std::cout << "PASS: parseMove correctly parses all 18 WCA move tokens.\n";
+
+  // Test 65: moveToString produces exact WCA notation and round-trips
+  for (std::size_t i = 0; i < MoveCount; ++i) {
+    const Move m = static_cast<Move>(i);
+    const std::string_view str = Notation::moveToString(m);
+    assert(!str.empty());
+    assert(Notation::parseMove(str) == m);
+  }
+  std::cout
+      << "PASS: moveToString correctly formats all 18 moves and round-trips.\n";
+
+  // Test 66: parseMove throws std::invalid_argument on malformed inputs
+  bool caughtInvalidFace = false;
+  try {
+    Notation::parseMove("X");
+  } catch (const std::invalid_argument &) {
+    caughtInvalidFace = true;
+  }
+  assert(caughtInvalidFace);
+
+  bool caughtInvalidModifier = false;
+  try {
+    Notation::parseMove("U3");
+  } catch (const std::invalid_argument &) {
+    caughtInvalidModifier = true;
+  }
+  assert(caughtInvalidModifier);
+
+  bool caughtEmptyToken = false;
+  try {
+    Notation::parseMove("");
+  } catch (const std::invalid_argument &) {
+    caughtEmptyToken = true;
+  }
+  assert(caughtEmptyToken);
+
+  bool caughtLongToken = false;
+  try {
+    Notation::parseMove("R2Prime");
+  } catch (const std::invalid_argument &) {
+    caughtLongToken = true;
+  }
+  assert(caughtLongToken);
+  std::cout
+      << "PASS: parseMove throws std::invalid_argument on malformed tokens.\n";
 
   return 0;
 }
