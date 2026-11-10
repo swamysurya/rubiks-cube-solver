@@ -492,6 +492,32 @@ Because their cycles do not touch any common pieces, their operations **commute*
 $$X \cdot Y = Y \cdot X \quad \text{and} \quad \mathbf{X2 \cdot Y2 = Y2 \cdot X2}$$
 *(Crucial optimization for the solver engine: we never need to search both paths $X2 \to Y2$ and $Y2 \to X2$ because they result in the exact same state!)*
 
+---
+
+## 9. Move Representation & Dispatcher (`enum class Move`)
+
+### Strongly Typed Move Enum
+Instead of calling 18 separate member functions by hand, we define a strongly typed `enum class Move : std::uint8_t` in [`include/Move.hpp`](../include/Move.hpp):
+* **Size**: Exactly 1 byte per move (`std::uint8_t`).
+* **Cache-friendly**: Minimal memory overhead when storing sequences of thousands of moves in solver search trees.
+* **18 Supported Values**:
+  * Up: `U`, `U_PRIME`, `U2`
+  * Down: `D`, `D_PRIME`, `D2`
+  * Front: `F`, `F_PRIME`, `F2`
+  * Back: `B`, `B_PRIME`, `B2`
+  * Left: `L`, `L_PRIME`, `L2`
+  * Right: `R`, `R_PRIME`, `R2`
+
+### The Jump-Table Dispatcher (`Cube::apply`)
+`Cube::apply(Move move)` dispatches each enum value to its corresponding rotation function via a `switch` statement.
+* Because the enum values are contiguous integers (`0` to `17`), modern compilers generate an **$O(1)$ indirect jump table** in assembly, executing move dispatches with zero branch misprediction overhead.
+
+### The Sexy Move 6-Cycle Theorem
+In Rubik's Cube group theory, repeating the 4-move algorithm $(R \; U \; R' \; U')$ cycles through a subgroup of order 6:
+$$\mathbf{(R \; U \; R' \; U')^6 = Identity}$$
+Applying the sequence 6 times restores all 54 stickers to their pristine solved state!
+
+
 
 
 

@@ -554,5 +554,44 @@ int main() {
   assert(lrCube == rlCube);
   std::cout << "PASS: Disjoint opposite faces commute (L2 * R2 == R2 * L2).\n";
 
+  // =========================================================================
+  // 10. Move Dispatcher & WCA Trigger Tests
+  // =========================================================================
+
+  // Test 60: apply(Move::U) matches rotateUpClockwise()
+  Cube applyU;
+  applyU.apply(Move::U);
+  Cube directU;
+  directU.rotateUpClockwise();
+  assert(applyU == directU);
+  std::cout << "PASS: apply(Move::U) produces identical state to rotateUpClockwise().\n";
+
+  // Test 61: apply(Move::F_PRIME) matches rotateFrontCounterClockwise()
+  Cube applyFPrime;
+  applyFPrime.apply(Move::F_PRIME);
+  Cube directFPrime;
+  directFPrime.rotateFrontCounterClockwise();
+  assert(applyFPrime == directFPrime);
+  std::cout << "PASS: apply(Move::F_PRIME) produces identical state to rotateFrontCounterClockwise().\n";
+
+  // Test 62: apply(Move::R2) matches rotateRightDouble()
+  Cube applyR2;
+  applyR2.apply(Move::R2);
+  Cube directR2;
+  directR2.rotateRightDouble();
+  assert(applyR2 == directR2);
+  std::cout << "PASS: apply(Move::R2) produces identical state to rotateRightDouble().\n";
+
+  // Test 63: The 6-Cycle "Sexy Move" Invariant: (R U R' U')^6 = Identity
+  Cube sexyMoveCube;
+  for (int i = 0; i < 6; ++i) {
+    sexyMoveCube.apply(Move::R);
+    sexyMoveCube.apply(Move::U);
+    sexyMoveCube.apply(Move::R_PRIME);
+    sexyMoveCube.apply(Move::U_PRIME);
+  }
+  assert(sexyMoveCube == originalCube);
+  std::cout << "PASS: Six repetitions of (R U R' U') restore identity ((R U R' U')^6 = I).\n";
+
   return 0;
 }

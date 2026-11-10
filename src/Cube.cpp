@@ -359,6 +359,40 @@ void Cube::rotateRightDouble() {
   rotateRightClockwise();
 }
 
+// =============================================================================
+// 6. Move Dispatcher
+// =============================================================================
+// Dispatches any standard WCA move to its corresponding member rotation.
+// The contiguous values (0 to 17) enable the compiler to emit a fast O(1)
+// indirect jump table with zero branch overhead.
+void Cube::apply(Move move) {
+  switch (move) {
+  case Move::U: rotateUpClockwise(); break;
+  case Move::U_PRIME: rotateUpCounterClockwise(); break;
+  case Move::U2: rotateUpDouble(); break;
+
+  case Move::D: rotateDownClockwise(); break;
+  case Move::D_PRIME: rotateDownCounterClockwise(); break;
+  case Move::D2: rotateDownDouble(); break;
+
+  case Move::F: rotateFrontClockwise(); break;
+  case Move::F_PRIME: rotateFrontCounterClockwise(); break;
+  case Move::F2: rotateFrontDouble(); break;
+
+  case Move::B: rotateBackClockwise(); break;
+  case Move::B_PRIME: rotateBackCounterClockwise(); break;
+  case Move::B2: rotateBackDouble(); break;
+
+  case Move::L: rotateLeftClockwise(); break;
+  case Move::L_PRIME: rotateLeftCounterClockwise(); break;
+  case Move::L2: rotateLeftDouble(); break;
+
+  case Move::R: rotateRightClockwise(); break;
+  case Move::R_PRIME: rotateRightCounterClockwise(); break;
+  case Move::R2: rotateRightDouble(); break;
+  }
+}
+
 void Cube::rotateFaceClockwise(std::size_t face) {
   const std::size_t start = face * StickersPerFace;
   const auto old = stickers;

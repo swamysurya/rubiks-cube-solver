@@ -7,6 +7,8 @@
 #include <array>
 #include <cstddef>
 
+#include "Move.hpp"
+
 // =============================================================================
 // Scoped Enumeration: Color
 // =============================================================================
@@ -161,6 +163,12 @@ public:
 
   // Rotates the Right face (Face 5, Green) 180 degrees (R2)
   void rotateRightDouble();
+
+  // -------------------------------------------------------------------------
+  // 7. Move Application & Dispatcher
+  // -------------------------------------------------------------------------
+  // Applies any standard WCA move (Clockwise, Prime, or Double) to the cube.
+  void apply(Move move);
 
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
   // by 90 degrees. Applies the 2D coordinate transformation: (row, col) ->

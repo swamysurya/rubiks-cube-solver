@@ -528,6 +528,27 @@ assert(lrCube == rlCube);
 ```
 - **Verifies**: Because Left and Right share zero stickers, their operations commute.
 
+### Tests 60–62: General Move Dispatcher (`Cube::apply(Move)`)
+```cpp
+// Test 60: apply(Move::U) == rotateUpClockwise()
+// Test 61: apply(Move::F_PRIME) == rotateFrontCounterClockwise()
+// Test 62: apply(Move::R2) == rotateRightDouble()
+```
+- **Verifies**: `Cube::apply(Move)` correctly routes clock, prime, and double moves to their respective member functions.
+
+### Test 63: The 6-Cycle "Sexy Move" Invariant ($(R \; U \; R' \; U')^6 = I$)
+```cpp
+Cube sexyMoveCube;
+for (int i = 0; i < 6; ++i) {
+  sexyMoveCube.apply(Move::R);
+  sexyMoveCube.apply(Move::U);
+  sexyMoveCube.apply(Move::R_PRIME);
+  sexyMoveCube.apply(Move::U_PRIME);
+}
+assert(sexyMoveCube == originalCube);
+```
+- **Verifies**: Repeating $(R \; U \; R' \; U')$ exactly 6 times restores the solved cube state, verifying group cyclic order.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -602,5 +623,9 @@ PASS: Two Right Double turns restore every sticker position ((R2)^2 = I).
 PASS: Right Double is identical to two clockwise turns (R2 == R * R).
 PASS: Right Double is identical to two prime turns (R2 == R' * R').
 PASS: Disjoint opposite faces commute (L2 * R2 == R2 * L2).
+PASS: apply(Move::U) produces identical state to rotateUpClockwise().
+PASS: apply(Move::F_PRIME) produces identical state to rotateFrontCounterClockwise().
+PASS: apply(Move::R2) produces identical state to rotateRightDouble().
+PASS: Six repetitions of (R U R' U') restore identity ((R U R' U')^6 = I).
 ```
 
