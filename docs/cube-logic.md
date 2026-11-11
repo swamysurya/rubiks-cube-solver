@@ -1122,6 +1122,89 @@ A struct or class that overloads `operator()` is called a **Functor** (function 
 * **`const` qualifier**: Hashing a cube inspects its state but never modifies it.
 * **`noexcept` guarantee**: Hash calculations are pure arithmetic and guaranteed never to throw an exception.
 
+---
+
+## 13. Breadth-First Search (BFS) Solver Engine (`Solver.hpp`)
+
+### 13.1 Graph Representation: The Cube as a Map of Islands
+In graph theory, any system of states and transitions can be mapped as a **directed graph**:
+- **Nodes (Vertices)**: Unique configurations of the cube's 54 stickers.
+- **Edges**: The 18 standard WCA face turns ($U, U', U2, D, \dots$).
+- **Target Node**: The Solved Cube configuration.
+
+Solving a scrambled cube translates mathematically to: **Finding a path from the scrambled node to the solved node in the state graph.**
+
+---
+
+### 13.2 Breadth-First Search (BFS) Mechanics
+Think of dropping a pebble into a pond: ripples expand outward evenly in all directions.
+BFS explores the state graph in concentric levels:
+
+```text
+               (Ripples expand outward level by level)
+                      
+                         Level 3 (3 moves)
+                      ┌──────────────────────┐
+                      │  Level 2 (2 moves)   │
+                      │  ┌────────────────┐  │
+                      │  │Level 1 (1 move)│  │
+                      │  │  ┌──────────┐  │  │
+                      │  │  │ Scramble │  │  │
+                      │  │  └──────────┘  │  │
+                      │  └────────────────┘  │
+                      └──────────────────────┘
+```
+
+1. **Level 0**: Check if the starting cube is already solved (0 moves).
+2. **Level 1**: Explore all 18 single-move neighbors ($U, D, F, B, L, R, \dots$).
+3. **Level 2**: Explore all 2-move neighbors ($18 \times 18 = 324$ paths).
+4. **Level 3**: Explore all 3-move neighbors ($5,832$ paths).
+5. Continues level-by-level until reaching a solved state or hitting `maxDepth`.
+
+#### The Optimality Guarantee:
+Because BFS evaluates every single path of length $k$ before testing any path of length $k+1$, the very first solution it encounters is **guaranteed to be the globally shortest (optimal) sequence of moves**.
+
+---
+
+### 13.3 The Queue Data Structure (FIFO)
+To explore level-by-level without recursion, BFS relies on a **Queue** (`std::queue` in `<queue>`):
+- **FIFO (First-In, First-Out)**: Elements pushed first are popped and inspected first.
+- Each item in the queue is a search node containing:
+  ```cpp
+  struct Node {
+      Cube cube;                     // The current cube configuration
+      std::vector<Move> path;        // The sequence of moves taken to reach this state
+  };
+  ```
+
+---
+
+### 13.4 C++ Feature: `std::optional<T>` from `<optional>`
+
+#### The Dilemma:
+When searching for a solution, the search may succeed or fail (e.g., if the scramble depth exceeds `maxDepth`).
+- If solved in 0 moves (already solved) $\to$ The answer is an **empty vector** `std::vector<Move>{}`.
+- If no solution is found $\to$ Returning an empty vector would erroneously signal "solved in 0 moves!"
+
+#### The Modern Solution:
+`std::optional<T>` acts as a type-safe container that either holds a value or `std::nullopt`:
+
+```text
+          ┌───────────────────────────────────┐
+          │       std::optional<T> box        │
+          └───────────────────────────────────┘
+               │                          │
+        (Box has a value)           (Box is empty)
+               ▼                          ▼
+   std::vector<Move>{ ... }         std::nullopt
+      "Found a solution!"         "No solution found!"
+```
+
+- Checking if a solution exists: `if (solution.has_value())` or `if (solution)`
+- Accessing the moves: `solution.value()` or `*solution`
+- Indicating failure: `return std::nullopt;`
+
+
 
 
 

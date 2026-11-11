@@ -21,20 +21,24 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # - src/main.cpp contains the application entry point main().
 # - src/Cube.cpp contains the Cube class implementation.
 # - src/Notation.cpp contains WCA notation parsing and formatting.
+# - src/Solver.cpp contains the search and solving algorithms.
 add_executable(rubiks_solver
     src/main.cpp
     src/Cube.cpp
     src/Notation.cpp
+    src/Solver.cpp
 )
 
 # Target 2: cube_tests (automated unit test runner)
 # - tests/CubeTests.cpp has its own main() function to test Cube logic in isolation.
 # - Both targets include src/Cube.cpp because both need the Cube implementation.
 # - Both targets include src/Notation.cpp for move notation conversions.
+# - Both targets include src/Solver.cpp for testing search algorithms.
 add_executable(cube_tests
     tests/CubeTests.cpp
     src/Cube.cpp
     src/Notation.cpp
+    src/Solver.cpp
 )
 
 # Tells CMake: "When #include "Cube.hpp" appears in the source files, look inside the include/ directory to find it."

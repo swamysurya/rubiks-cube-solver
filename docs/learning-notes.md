@@ -41,3 +41,4 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Algorithm parsing & formatting: Words and generators in group theory, zero-allocation whitespace tokenization (`find_first_not_of` / `find_first_of`), and the Fencepost problem solution
    - 3-Tier Facade Architecture & Overload Resolution: API layering (`apply(Move)` vs `apply(vector)` vs `apply(string_view)`), C++ type deduction, and sequence execution flow
    - State Hashing & Graph Search Foundations: The library book search intuition ($O(N)$ vs $O(1)$), state space explosion, Golden Ratio hash combining, and `std::hash<Cube>` template specialization via Functors (`operator()`) for `std::unordered_set`
+   - BFS Solver Engine: State-graph island map, level-by-level ripples exploration, FIFO queue (`std::queue`), optimal shortest-path guarantee, and `std::optional<T>` for clean success/failure semantics
