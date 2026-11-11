@@ -40,3 +40,4 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - WCA notation interface (`Notation.hpp`): C++ Namespaces vs Classes, zero-allocation `std::string_view` (memory layout & non-owning lifetimes), and `noexcept` guarantees
    - Algorithm parsing & formatting: Words and generators in group theory, zero-allocation whitespace tokenization (`find_first_not_of` / `find_first_of`), and the Fencepost problem solution
    - 3-Tier Facade Architecture & Overload Resolution: API layering (`apply(Move)` vs `apply(vector)` vs `apply(string_view)`), C++ type deduction, and sequence execution flow
+   - State Hashing & Graph Search Foundations: The library book search intuition ($O(N)$ vs $O(1)$), state space explosion, Golden Ratio hash combining, and `std::hash<Cube>` template specialization via Functors (`operator()`) for `std::unordered_set`

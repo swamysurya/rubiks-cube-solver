@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <string_view>
 #include <vector>
 
@@ -173,10 +174,11 @@ public:
   void apply(Move move);
 
   // Applies an ordered sequence of standard WCA moves to the cube.
-  void apply(const std::vector<Move>& moves);
+  void apply(const std::vector<Move> &moves);
 
-  // Parses and executes a space-separated WCA algorithm string (e.g. "R U R' U'").
-  // Throws std::invalid_argument if any token in the algorithm string is malformed.
+  // Parses and executes a space-separated WCA algorithm string (e.g. "R U R'
+  // U'"). Throws std::invalid_argument if any token in the algorithm string is
+  // malformed.
   void apply(std::string_view algorithm);
 
   // Helper: Rotates the internal 3x3 grid of a specific face (0 to 5) clockwise
@@ -196,5 +198,27 @@ private:
   // colors directly.
   std::array<Color, StickerCount> stickers;
 };
+
+// =============================================================================
+// Standard Library Specialization: std::hash<Cube>
+// =============================================================================
+// Enables Cube instances to be used as keys in unordered hash-based containers
+// such as std::unordered_set<Cube> and std::unordered_map<Cube, T>.
+//
+// Uses the Golden Ratio hash combining formula to combine all 54 stickers into
+// a single high-entropy 64-bit hash code with O(1) performance and zero heap allocations.
+namespace std {
+template <>
+struct hash<Cube> {
+  std::size_t operator()(const Cube& cube) const noexcept {
+    std::size_t seed = 0;
+    for (std::size_t i = 0; i < Cube::StickerCount; ++i) {
+      const auto val = static_cast<std::size_t>(cube.getSticker(i));
+      seed ^= val + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+} // namespace std
 
 #endif // CUBE_HPP

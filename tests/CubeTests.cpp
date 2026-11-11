@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
+#include <unordered_set>
 
 int main() {
   // =========================================================================
@@ -755,6 +756,41 @@ int main() {
   assert(caughtInvalidInAlg);
   std::cout << "PASS: parseAlgorithm throws std::invalid_argument on malformed "
                "algorithm string.\n";
+
+  // =========================================================================
+  // 13. Cube State Hashing & Unordered Container Tests
+  // =========================================================================
+
+  // Test 74: Hash Determinism (identical cube states produce identical hashes)
+  Cube hashCube1;
+  Cube hashCube2;
+  const std::size_t hash1 = std::hash<Cube>{}(hashCube1);
+  const std::size_t hash2 = std::hash<Cube>{}(hashCube2);
+  assert(hash1 == hash2);
+  std::cout << "PASS: std::hash<Cube> is deterministic (identical states yield identical hashes).\n";
+
+  // Test 75: Hash Sensitivity (different cube states produce different hashes)
+  Cube turnedCube;
+  turnedCube.rotateUpClockwise();
+  const std::size_t turnedHash = std::hash<Cube>{}(turnedCube);
+  assert(turnedHash != hash1);
+  std::cout << "PASS: std::hash<Cube> is sensitive (different states yield different hashes).\n";
+
+  // Test 76: std::unordered_set<Cube> integration & O(1) duplicate rejection
+  std::unordered_set<Cube> visitedCubes;
+  visitedCubes.insert(hashCube1);
+  assert(visitedCubes.size() == 1);
+  assert(visitedCubes.contains(hashCube1));
+
+  // Inserting duplicate state: size must NOT increase
+  visitedCubes.insert(hashCube2);
+  assert(visitedCubes.size() == 1);
+
+  // Inserting new state: size increments to 2
+  visitedCubes.insert(turnedCube);
+  assert(visitedCubes.size() == 2);
+  assert(visitedCubes.contains(turnedCube));
+  std::cout << "PASS: std::unordered_set<Cube> successfully stores states and rejects duplicates in O(1).\n";
 
   return 0;
 }

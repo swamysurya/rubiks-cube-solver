@@ -636,6 +636,39 @@ assert(tPermCube == originalCube); // Second application restores identity
 ```
 - **Verifies**: `Notation::parseAlgorithm` fails fast and throws `std::invalid_argument` if any token in a multi-move sequence is malformed.
 
+### Test 74: Hash Determinism for Identical States
+```cpp
+Cube hashCube1;
+Cube hashCube2;
+assert(std::hash<Cube>{}(hashCube1) == std::hash<Cube>{}(hashCube2));
+```
+- **Verifies**: `std::hash<Cube>` is deterministic. Two independently created cubes with identical sticker layouts always yield the exact same 64-bit hash code.
+
+### Test 75: Hash Sensitivity (Collision Avoidance Across Different States)
+```cpp
+Cube turnedCube;
+turnedCube.rotateUpClockwise();
+assert(std::hash<Cube>{}(turnedCube) != std::hash<Cube>{}(hashCube1));
+```
+- **Verifies**: Altering even a single face rotation produces a completely different hash value via Golden Ratio bit scrambling, preventing hash collisions in the solver search space.
+
+### Test 76: Container Integration with `std::unordered_set<Cube>`
+```cpp
+std::unordered_set<Cube> visitedCubes;
+visitedCubes.insert(hashCube1);
+assert(visitedCubes.size() == 1);
+
+// Inserting duplicate state does not increase set size
+visitedCubes.insert(hashCube2);
+assert(visitedCubes.size() == 1);
+
+// Inserting new state increments set size to 2
+visitedCubes.insert(turnedCube);
+assert(visitedCubes.size() == 2);
+assert(visitedCubes.contains(turnedCube));
+```
+- **Verifies**: `Cube` seamlessly functions as a key in standard hash-based containers (`std::unordered_set`), enabling $O(1)$ duplicate rejection and fast visited-state tracking.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -724,5 +757,9 @@ PASS: apply(std::string_view) produces identical state to vector apply.
 PASS: Six repetitions of apply("R U R' U'") restore identity ((R U R' U')^6 = I).
 PASS: Two repetitions of T-Permutation restore identity ((T-Perm)^2 = I).
 PASS: parseAlgorithm throws std::invalid_argument on malformed algorithm string.
+PASS: std::hash<Cube> is deterministic (identical states yield identical hashes).
+PASS: std::hash<Cube> is sensitive (different states yield different hashes).
+PASS: std::unordered_set<Cube> successfully stores states and rejects duplicates in O(1).
+```
 ```
 
