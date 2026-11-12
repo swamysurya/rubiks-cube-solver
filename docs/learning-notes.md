@@ -23,7 +23,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
 
 3. 📂 **[Testing & CTest Notes](testing.md)**
    - Testing invariants and regression prevention
-   - Complete breakdown of all 81 automated tests in `CubeTests.cpp` across 14 verification suites (invariants, face rotations, primes, double turns, WCA notation parser/formatter, hashing, and BFS solver)
+   - Complete breakdown of all 86 automated tests in `CubeTests.cpp` across 15 verification suites (invariants, face rotations, primes, double turns, WCA notation parser/formatter, hashing, BFS solver, random scrambler, and 2D net visualizer)
    - CTest execution and expected output
    - Modern C++ Test Syntax Guide: working with `std::optional` in assertions (`.has_value()`, arrow operator `->` vs dot `.`, `.front()` vector access, and dereference unwrapping `*`)
 
@@ -45,3 +45,4 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - BFS Solver Engine: State-graph island map, level-by-level ripples exploration, FIFO queue (`std::queue`), optimal shortest-path guarantee, and `std::optional<T>` for clean success/failure semantics
    - Solver Limits & Search Theory: `maxDepth` safety brake against $18^d$ state explosion, RAM consumption thresholds (depth 1 to 7), God's Number (20 moves), and why brute-force BFS necessitates successor algorithms (IDDFS, IDA*, Kociemba's Two-Phase Algorithm)
    - Search Engine Code Architecture: Anonymous namespace internal linkage (`SearchNode`), line-by-line while-loop breakdown, early goal check optimization (up to 90% memory savings), move semantics (`std::move` vs `Move` enum), and $O(1)$ visited set pruning
+   - Random Scrambler & 2D Net Visualizer: WCA non-canceling move generation rules, bitwise opposite face mapping (`face ^ 1`), ANSI 24-bit/16-color 2D cross layout (`Cube::printNet`), and interactive console CLI architecture

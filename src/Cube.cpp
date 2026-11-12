@@ -100,6 +100,80 @@ void Cube::print() const {
   }
 }
 
+namespace {
+
+void printSticker(Color color, bool useColor) {
+  if (!useColor) {
+    switch (color) {
+    case Color::White:  std::cout << "W "; break;
+    case Color::Yellow: std::cout << "Y "; break;
+    case Color::Red:    std::cout << "R "; break;
+    case Color::Orange: std::cout << "O "; break;
+    case Color::Blue:   std::cout << "B "; break;
+    case Color::Green:  std::cout << "G "; break;
+    }
+    return;
+  }
+
+  // ANSI escape codes for high-contrast colored blocks
+  switch (color) {
+  case Color::White:
+    std::cout << "\033[47;30m W \033[0m"; // White bg, black text
+    break;
+  case Color::Yellow:
+    std::cout << "\033[43;30m Y \033[0m"; // Yellow bg, black text
+    break;
+  case Color::Red:
+    std::cout << "\033[41;37m R \033[0m"; // Red bg, white text
+    break;
+  case Color::Orange:
+    std::cout << "\033[48;2;255;140;0;30m O \033[0m"; // 24-bit Orange bg, black text
+    break;
+  case Color::Blue:
+    std::cout << "\033[44;37m B \033[0m"; // Blue bg, white text
+    break;
+  case Color::Green:
+    std::cout << "\033[42;30m G \033[0m"; // Green bg, black text
+    break;
+  }
+}
+
+void printFaceRow(const Cube& cube, std::size_t face, std::size_t row, bool useColor) {
+  for (std::size_t col = 0; col < 3; ++col) {
+    const std::size_t index = face * Cube::StickersPerFace + row * 3 + col;
+    printSticker(cube.getSticker(index), useColor);
+  }
+}
+
+} // namespace
+
+void Cube::printNet(bool useColor) const {
+  const std::string pad = useColor ? "         " : "      ";
+
+  // 1. Up Face (Face 0)
+  for (std::size_t r = 0; r < 3; ++r) {
+    std::cout << pad;
+    printFaceRow(*this, 0, r, useColor);
+    std::cout << '\n';
+  }
+
+  // 2. Middle Band: Left (4), Front (2), Right (5), Back (3)
+  for (std::size_t r = 0; r < 3; ++r) {
+    printFaceRow(*this, 4, r, useColor);
+    printFaceRow(*this, 2, r, useColor);
+    printFaceRow(*this, 5, r, useColor);
+    printFaceRow(*this, 3, r, useColor);
+    std::cout << '\n';
+  }
+
+  // 3. Down Face (Face 1)
+  for (std::size_t r = 0; r < 3; ++r) {
+    std::cout << pad;
+    printFaceRow(*this, 1, r, useColor);
+    std::cout << '\n';
+  }
+}
+
 // =============================================================================
 // 3. Cube Rotations & Manipulations (mutating methods)
 // =============================================================================

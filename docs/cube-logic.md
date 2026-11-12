@@ -1336,3 +1336,62 @@ if (!visited.contains(nextCube)) {
 - A Rubik's Cube graph contains many cycles (e.g., $R \cdot R' = I$) and commutative paths ($U \cdot D = D \cdot U$).
 - `visited.contains(nextCube)` uses our custom `std::hash<Cube>` specialization, checking in $O(1)$ time whether a state has been seen before.
 - States already visited via a shorter or identical-length path are pruned immediately, preventing infinite loops and redundant exploration.
+
+---
+
+## 14. Random Scrambler & 2D Net Visualizer
+
+### 14.1 Official WCA Scramble Rules
+A standard Rubik's Cube scramble must follow two strict mathematical constraints to guarantee high entropy and avoid trivial cancellations:
+1. **No Consecutive Moves on the Same Face:**
+   Turns like `R R` or `R R'` are prohibited. Consecutive turns on the same face simplify immediately:
+   $$R \cdot R' = I, \quad R \cdot R = R2, \quad R \cdot R2 = R'$$
+2. **Opposite-Face Commutation Guard:**
+   Opposite faces (such as $R$ and $L$, or $U$ and $D$) share no common pieces and commute ($R \cdot L = L \cdot R$). A sequence like `R L R` is redundant because it simplifies to:
+   $$(R \cdot L) \cdot R = (L \cdot R) \cdot R = L \cdot R2$$
+   The scrambler prevents generating a move on face $X$ if the preceding two moves were $X$ and $X_{\text{opposite}}$.
+
+### 14.2 Mathematical Face Mapping & Bitwise Opposites
+In our numbering:
+* Up ($0$) $\leftrightarrow$ Down ($1$) $\implies 0 \oplus 1 = 1, \quad 1 \oplus 1 = 0$
+* Front ($2$) $\leftrightarrow$ Back ($3$) $\implies 2 \oplus 1 = 3, \quad 3 \oplus 1 = 2$
+* Left ($4$) $\leftrightarrow$ Right ($5$) $\implies 4 \oplus 1 = 5, \quad 5 \oplus 1 = 4$
+
+Because every face and its opposite differ strictly in the lowest bit, finding a face's opposite is an instantaneous bitwise XOR:
+```cpp
+constexpr std::size_t oppositeFace(std::size_t face) noexcept {
+  return face ^ 1;
+}
+```
+
+Each face has three move modifiers:
+* `+ 0` $\implies$ Clockwise (e.g. $U$)
+* `+ 1` $\implies$ Counter-Clockwise Prime (e.g. $U'$)
+* `+ 2` $\implies$ Half-Turn Double (e.g. $U2$)
+
+$$\text{Move} = \text{static\_cast<Move>}(\text{face} \times 3 + \text{modifier})$$
+
+### 14.3 ANSI Colored 2D Unfolded Net (`Cube::printNet`)
+To make the state instantly readable in terminals, `Cube::printNet` formats the 54 stickers into the standard unfolded cross layout:
+
+```text
+               [ Up (Face 0) ]
+[ Left (Face 4) ] [ Front (Face 2) ] [ Right (Face 5) ] [ Back (Face 3) ]
+              [ Down (Face 1) ]
+```
+
+Each sticker is formatted using ANSI 24-bit/16-color background escape codes with contrasting text:
+* ⬜ White: `\033[47;30m W \033[0m`
+* 🟨 Yellow: `\033[43;30m Y \033[0m`
+* 🟥 Red: `\033[41;37m R \033[0m`
+* 🟧 Orange: `\033[48;2;255;140;0;30m O \033[0m`
+* 🟦 Blue: `\033[44;37m B \033[0m`
+* 🟩 Green: `\033[42;30m G \033[0m`
+
+### 14.4 Interactive Application Loop (`src/main.cpp`)
+The main executable integrates all components into a terminal application:
+* Displays live solved/scrambled status badges.
+* Supports custom algorithm input (with exception handling for syntax errors).
+* Generates shallow (1–4 moves) and official (20 moves) scrambles on demand.
+* Dispatches `Solver::solveBfs` with millisecond performance timing.
+* Prompts to apply solutions directly to restore the cube in real time.

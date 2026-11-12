@@ -82,6 +82,13 @@ public:
   // B, G).
   void print() const;
 
+  // Prints the cube as an unfolded 2D cross layout:
+  //         [Up]
+  //  [Left] [Front] [Right] [Back]
+  //        [Down]
+  // Supports optional ANSI background color rendering for rich terminal display.
+  void printNet(bool useColor = true) const;
+
   // -------------------------------------------------------------------------
   // 4. Cube Rotations & Manipulations (mutating methods - modify state in
   // place)

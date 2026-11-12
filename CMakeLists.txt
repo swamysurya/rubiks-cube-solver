@@ -27,6 +27,7 @@ add_executable(rubiks_solver
     src/Cube.cpp
     src/Notation.cpp
     src/Solver.cpp
+    src/Scrambler.cpp
 )
 
 # Target 2: cube_tests (automated unit test runner)
@@ -34,11 +35,13 @@ add_executable(rubiks_solver
 # - Both targets include src/Cube.cpp because both need the Cube implementation.
 # - Both targets include src/Notation.cpp for move notation conversions.
 # - Both targets include src/Solver.cpp for testing search algorithms.
+# - Both targets include src/Scrambler.cpp for testing scramble generation.
 add_executable(cube_tests
     tests/CubeTests.cpp
     src/Cube.cpp
     src/Notation.cpp
     src/Solver.cpp
+    src/Scrambler.cpp
 )
 
 # Tells CMake: "When #include "Cube.hpp" appears in the source files, look inside the include/ directory to find it."

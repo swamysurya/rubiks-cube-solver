@@ -1,5 +1,6 @@
 #include "Cube.hpp"
 #include "Notation.hpp"
+#include "Scrambler.hpp"
 #include "Solver.hpp"
 #include <cassert>
 #include <iostream>
@@ -840,6 +841,48 @@ int main() {
   auto zeroDepthResult = Solver::solveBfs(unsolvedDepthZero, 0);
   assert(!zeroDepthResult.has_value());
   std::cout << "PASS: solveBfs returns std::nullopt immediately when maxDepth is 0 for unsolved cube.\n";
+
+  // =========================================================================
+  // 15. Random Scrambler & Net Visualizer Tests
+  // =========================================================================
+
+  // Test 82: Scrambler::generate returns requested number of moves
+  const auto scramble20 = Scrambler::generate(20, 12345);
+  assert(scramble20.size() == 20);
+  const auto scrambleShallow = Scrambler::generate(4, 12345);
+  assert(scrambleShallow.size() == 4);
+  const auto scrambleZero = Scrambler::generate(0);
+  assert(scrambleZero.empty());
+  std::cout << "PASS: Scrambler::generate produces exact requested scramble lengths (0, 4, 20).\n";
+
+  // Test 83: Scrambler never generates consecutive moves on the same face
+  for (std::size_t i = 1; i < scramble20.size(); ++i) {
+    const std::size_t prevFace = static_cast<std::size_t>(scramble20[i - 1]) / 3;
+    const std::size_t currFace = static_cast<std::size_t>(scramble20[i]) / 3;
+    assert(prevFace != currFace);
+  }
+  std::cout << "PASS: Scrambler strictly prevents consecutive moves on identical faces.\n";
+
+  // Test 84: Scrambler::generate is deterministic given an explicit seed
+  const auto seededTest1 = Scrambler::generate(15, 98765);
+  const auto seededTest2 = Scrambler::generate(15, 98765);
+  assert(seededTest1 == seededTest2);
+  std::cout << "PASS: Scrambler is deterministic when initialized with identical seeds.\n";
+
+  // Test 85: Scrambler::generateString produces valid WCA string that round-trips
+  const std::string scrambleStr = Scrambler::generateString(20, 42);
+  assert(!scrambleStr.empty());
+  const std::vector<Move> parsedScrambleMoves = Notation::parseAlgorithm(scrambleStr);
+  assert(parsedScrambleMoves.size() == 20);
+  const std::vector<Move> directMoves = Scrambler::generate(20, 42);
+  assert(parsedScrambleMoves == directMoves);
+  std::cout << "PASS: Scrambler::generateString round-trips accurately through Notation::parseAlgorithm.\n";
+
+  // Test 86: Cube::printNet executes cleanly without throwing
+  Cube netCube;
+  netCube.apply(scrambleShallow);
+  netCube.printNet(false); // Non-color mode
+  std::cout << "PASS: Cube::printNet renders 2D net cleanly without error.\n";
 
   return 0;
 }

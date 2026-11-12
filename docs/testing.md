@@ -721,6 +721,52 @@ assert(!zeroDepthResult.has_value());
 ```
 - **Verifies**: Guard clause ensures `maxDepth = 0` on an unsolved cube returns `std::nullopt` immediately without generating search nodes.
 
+### Test 82: Scrambler Move Length Accuracy
+```cpp
+const auto scramble20 = Scrambler::generate(20, 12345);
+assert(scramble20.size() == 20);
+const auto scrambleShallow = Scrambler::generate(4, 12345);
+assert(scrambleShallow.size() == 4);
+const auto scrambleZero = Scrambler::generate(0);
+assert(scrambleZero.empty());
+```
+- **Verifies**: `Scrambler::generate` yields vectors with the exact requested number of moves for boundary cases (0 moves, shallow 4-move scrambles, and full 20-move scrambles).
+
+### Test 83: Scrambler Non-Consecutive Face Invariant
+```cpp
+for (std::size_t i = 1; i < scramble20.size(); ++i) {
+    const std::size_t prevFace = static_cast<std::size_t>(scramble20[i - 1]) / 3;
+    const std::size_t currFace = static_cast<std::size_t>(scramble20[i]) / 3;
+    assert(prevFace != currFace);
+}
+```
+- **Verifies**: Enforces the WCA regulation that no two consecutive turns may operate on the exact same face, preventing immediate cancellations or redundant rotations.
+
+### Test 84: Scrambler Determinism with Explicit Seeds
+```cpp
+const auto seededTest1 = Scrambler::generate(15, 98765);
+const auto seededTest2 = Scrambler::generate(15, 98765);
+assert(seededTest1 == seededTest2);
+```
+- **Verifies**: Passing an explicit random seed configures the Mersenne Twister engine (`std::mt19937`) deterministically, ensuring reproducible test cases.
+
+### Test 85: Scrambler WCA String Generation & Round-Trip
+```cpp
+const std::string scrambleStr = Scrambler::generateString(20, 42);
+const std::vector<Move> parsedScrambleMoves = Notation::parseAlgorithm(scrambleStr);
+assert(parsedScrambleMoves.size() == 20);
+assert(parsedScrambleMoves == Scrambler::generate(20, 42));
+```
+- **Verifies**: `Scrambler::generateString` formats legal WCA strings that accurately parse back through `Notation::parseAlgorithm` without data loss.
+
+### Test 86: 2D Net Visualizer (`Cube::printNet`) Stability
+```cpp
+Cube netCube;
+netCube.apply(scrambleShallow);
+netCube.printNet(false);
+```
+- **Verifies**: `Cube::printNet` renders the 6-face cross layout without exceptions, buffer overruns, or index crashes.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -817,6 +863,11 @@ PASS: solveBfs finds optimal 1-move solution (F') for F turn and restores solved
 PASS: solveBfs finds optimal 3-move solution for 'R U R'' scramble and restores solved state.
 PASS: solveBfs returns std::nullopt when scramble requires more moves than maxDepth.
 PASS: solveBfs returns std::nullopt immediately when maxDepth is 0 for unsolved cube.
+PASS: Scrambler::generate produces exact requested scramble lengths (0, 4, 20).
+PASS: Scrambler strictly prevents consecutive moves on identical faces.
+PASS: Scrambler is deterministic when initialized with identical seeds.
+PASS: Scrambler::generateString round-trips accurately through Notation::parseAlgorithm.
+PASS: Cube::printNet renders 2D net cleanly without error.
 ```
 
 ---
