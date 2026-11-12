@@ -75,5 +75,75 @@ std::optional<std::vector<Move>> solveBfs(const Cube& startCube, std::size_t max
   return std::nullopt;
 }
 
+namespace {
+
+// Checks whether branching into candidateFace would cancel or simplify with preceding moves.
+// Reduces the effective branching factor from 18 down to ~13.3.
+inline bool isRedundantMove(std::size_t candidateFace, int lastFace, int secondLastFace) noexcept {
+  // Rule 1: No consecutive turns on the same face (e.g. R followed by R')
+  if (static_cast<int>(candidateFace) == lastFace) {
+    return true;
+  }
+  // Rule 2: No commuting opposite face sandwich (e.g. R L R)
+  if (lastFace != -1 && secondLastFace != -1 &&
+      lastFace == static_cast<int>(candidateFace ^ 1) &&
+      secondLastFace == static_cast<int>(candidateFace)) {
+    return true;
+  }
+  return false;
+}
+
+// Bounded Depth-First Search worker
+bool dfs(const Cube& current, std::size_t depthRemaining, int lastFace, int secondLastFace, std::vector<Move>& path) {
+  for (std::size_t i = 0; i < MoveCount; ++i) {
+    const std::size_t face = i / 3;
+    if (isRedundantMove(face, lastFace, secondLastFace)) {
+      continue;
+    }
+
+    const Move move = static_cast<Move>(i);
+    Cube nextCube = current;
+    nextCube.apply(move);
+
+    // Early Goal Check on child
+    if (nextCube.isSolved()) {
+      path.push_back(move);
+      return true;
+    }
+
+    // Continue deepening if depth allows
+    if (depthRemaining > 1) {
+      path.push_back(move);
+      if (dfs(nextCube, depthRemaining - 1, static_cast<int>(face), lastFace, path)) {
+        return true;
+      }
+      path.pop_back(); // Backtrack
+    }
+  }
+
+  return false;
+}
+
+} // namespace
+
+std::optional<std::vector<Move>> solveIddfs(const Cube& startCube, std::size_t maxDepth) {
+  // Base Case: Already solved (0 moves required)
+  if (startCube.isSolved()) {
+    return std::vector<Move>{};
+  }
+
+  // Iteratively deepen search depth from 1 to maxDepth
+  for (std::size_t depth = 1; depth <= maxDepth; ++depth) {
+    std::vector<Move> path;
+    path.reserve(depth);
+
+    if (dfs(startCube, depth, -1, -1, path)) {
+      return path; // First solution discovered is guaranteed optimal
+    }
+  }
+
+  return std::nullopt;
+}
+
 } // namespace Solver
 

@@ -884,5 +884,57 @@ int main() {
   netCube.printNet(false); // Non-color mode
   std::cout << "PASS: Cube::printNet renders 2D net cleanly without error.\n";
 
+  // =========================================================================
+  // 16. IDDFS Solver Engine Tests
+  // =========================================================================
+
+  // Test 87: solveIddfs returns empty vector (0 moves) when cube is already solved
+  Cube iddfsSolvedCube;
+  auto iddfsSolvedRes = Solver::solveIddfs(iddfsSolvedCube, 4);
+  assert(iddfsSolvedRes.has_value());
+  assert(iddfsSolvedRes->empty());
+  std::cout << "PASS: solveIddfs returns empty move vector (0 moves) on already-solved cube.\n";
+
+  // Test 88: solveIddfs solves 1-move scramble (R) with 1 move (R')
+  Cube iddfsSingleCube;
+  iddfsSingleCube.apply(Move::R);
+  assert(!iddfsSingleCube.isSolved());
+  auto iddfsSingleSolution = Solver::solveIddfs(iddfsSingleCube, 4);
+  assert(iddfsSingleSolution.has_value());
+  assert(iddfsSingleSolution->size() == 1);
+  assert(iddfsSingleSolution->front() == Move::R_PRIME);
+  iddfsSingleCube.apply(*iddfsSingleSolution);
+  assert(iddfsSingleCube.isSolved());
+  std::cout << "PASS: solveIddfs finds optimal 1-move solution (R') for R turn and restores solved state.\n";
+
+  // Test 89: solveIddfs solves 3-move scramble (U F R) with optimal 3-move sequence
+  Cube iddfsThreeCube;
+  iddfsThreeCube.apply("U F R");
+  assert(!iddfsThreeCube.isSolved());
+  auto iddfsThreeSolution = Solver::solveIddfs(iddfsThreeCube, 4);
+  assert(iddfsThreeSolution.has_value());
+  assert(iddfsThreeSolution->size() == 3);
+  iddfsThreeCube.apply(*iddfsThreeSolution);
+  assert(iddfsThreeCube.isSolved());
+  std::cout << "PASS: solveIddfs finds optimal 3-move solution for 'U F R' scramble.\n";
+
+  // Test 90: solveIddfs solves 5-move scramble (breaking past BFS 4-move limit)
+  Cube iddfsDeepCube;
+  iddfsDeepCube.apply("R U R' U' F"); // 5 moves deep
+  assert(!iddfsDeepCube.isSolved());
+  auto iddfsDeepSolution = Solver::solveIddfs(iddfsDeepCube, 5);
+  assert(iddfsDeepSolution.has_value());
+  assert(iddfsDeepSolution->size() == 5);
+  iddfsDeepCube.apply(*iddfsDeepSolution);
+  assert(iddfsDeepCube.isSolved());
+  std::cout << "PASS: solveIddfs successfully solves 5-move scramble with zero memory overhead.\n";
+
+  // Test 91: solveIddfs returns std::nullopt when scramble exceeds maxDepth
+  Cube iddfsExceedCube;
+  iddfsExceedCube.apply("R U R' U' F"); // 5 moves deep
+  auto iddfsExceeded = Solver::solveIddfs(iddfsExceedCube, 3);
+  assert(!iddfsExceeded.has_value());
+  std::cout << "PASS: solveIddfs returns std::nullopt when scramble exceeds allowed depth limit.\n";
+
   return 0;
 }

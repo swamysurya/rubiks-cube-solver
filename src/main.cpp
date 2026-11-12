@@ -30,9 +30,10 @@ void printMenu(bool useColor) {
   std::cout << " [2] Apply Custom Algorithm / Moves (e.g. \"R U R' U'\")\n";
   std::cout << " [3] Generate & Apply Shallow Scramble (1-4 moves)\n";
   std::cout << " [4] Generate & Apply Official Scramble (20 moves)\n";
-  std::cout << " [5] Solve Cube with BFS Solver\n";
-  std::cout << " [6] Reset Cube to Solved State\n";
-  std::cout << " [7] Toggle Terminal Colors (Currently: " << (useColor ? "ON" : "OFF") << ")\n";
+  std::cout << " [5] Solve with BFS Solver (Breadth-First, maxDepth = 4)\n";
+  std::cout << " [6] Solve with IDDFS Solver (Iterative Deepening, O(d) Memory, maxDepth = 6-7)\n";
+  std::cout << " [7] Reset Cube to Solved State\n";
+  std::cout << " [8] Toggle Terminal Colors (Currently: " << (useColor ? "ON" : "OFF") << ")\n";
   std::cout << " [0] Exit Application\n";
   std::cout << "----------------------------------------------\n";
   std::cout << "Enter your choice: ";
@@ -130,9 +131,51 @@ int main() {
         std::cout << "(Pure BFS is bounded to depth 4 to prevent out-of-memory crashes).\n";
       }
     } else if (choice == "6") {
+      if (cube.isSolved()) {
+        std::cout << "\nCube is already solved! No moves needed.\n";
+        continue;
+      }
+
+      std::cout << "Enter max search depth for IDDFS (1 to 7) [default: 6]: ";
+      std::string depthStr;
+      std::size_t maxD = 6;
+      if (std::getline(std::cin, depthStr) && !depthStr.empty()) {
+        try {
+          maxD = std::stoul(depthStr);
+          if (maxD > 7) maxD = 7;
+        } catch (...) {
+          maxD = 6;
+        }
+      }
+
+      std::cout << "\nSearching with IDDFS (O(d) stack memory, maxDepth = " << maxD << ")...\n";
+      const auto startTime = std::chrono::steady_clock::now();
+      const auto solution = Solver::solveIddfs(cube, maxD);
+      const auto endTime = std::chrono::steady_clock::now();
+      const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+
+      if (solution.has_value()) {
+        const std::string solutionStr = Notation::formatAlgorithm(*solution);
+        std::cout << "\n\033[32m[ IDDFS SOLUTION FOUND! ]\033[0m\n";
+        std::cout << "Optimal Solution (" << solution->size() << " moves): " << solutionStr << '\n';
+        std::cout << "Search Time: " << elapsedMs << " ms\n";
+
+        std::cout << "\nApply solution to restore cube? (Y/n): ";
+        std::string confirm;
+        std::getline(std::cin, confirm);
+        if (confirm.empty() || confirm == "y" || confirm == "Y") {
+          cube.apply(*solution);
+          std::cout << "\nCube restored to solved state!\n";
+          cube.printNet(useColor);
+        }
+      } else {
+        std::cout << "\n\033[33m[ NO SOLUTION FOUND WITHIN " << maxD << " MOVES ]\033[0m\n";
+        std::cout << "Search Time: " << elapsedMs << " ms\n";
+      }
+    } else if (choice == "7") {
       cube = Cube{};
       std::cout << "\nCube reset to solved identity state.\n";
-    } else if (choice == "7") {
+    } else if (choice == "8") {
       useColor = !useColor;
       std::cout << "\nTerminal colors toggled: " << (useColor ? "ON" : "OFF") << '\n';
     } else {

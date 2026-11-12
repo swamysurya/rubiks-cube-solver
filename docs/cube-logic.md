@@ -1395,3 +1395,81 @@ The main executable integrates all components into a terminal application:
 * Generates shallow (1–4 moves) and official (20 moves) scrambles on demand.
 * Dispatches `Solver::solveBfs` with millisecond performance timing.
 * Prompts to apply solutions directly to restore the cube in real time.
+
+---
+
+## 15. Iterative Deepening Depth-First Search (IDDFS) Engine
+
+### 15.1 Breaking the BFS Memory Wall
+While pure BFS guarantees finding the optimal shortest path, its memory complexity is **$O(b^d)$ (exponential)**. Storing millions of cube states in a FIFO queue and hash set quickly consumes all available RAM beyond depth 4.
+
+Conversely, standard Depth-First Search (DFS) has minimal memory complexity ($O(d)$ stack space), but:
+* It can explore deep, non-optimal paths without ever terminating.
+* It does not guarantee finding the shortest path.
+
+**Iterative Deepening Depth-First Search (IDDFS)** solves this dilemma by merging the best of both worlds:
+* **Optimality Guarantee of BFS:** Searches depth 1, then depth 2, then depth 3... The first solution encountered is guaranteed to be the shortest path.
+* **Minimal Memory of DFS:** Because it searches depth-first within each limit, it stores only the current branch on the call stack ($O(d)$ memory). At depth 7, memory consumption is **$< 1 \text{ KB}$**, completely eliminating `std::bad_alloc` crashes!
+
+```text
+Iterative Deepening Search Flow:
+Iteration 1: Depth Limit = 1 ──► [Try all 1-move paths]
+Iteration 2: Depth Limit = 2 ──► [Try all 2-move paths]
+Iteration 3: Depth Limit = 3 ──► [Try all 3-move paths]
+Iteration 4: Depth Limit = 4 ──► [Try all 4-move paths]
+Iteration 5: Depth Limit = 5 ──► [Try all 5-move paths] ──► SOLUTION FOUND! (Optimal)
+```
+
+### 15.2 Branch Pruning: Reducing Effective Branching from 18 to ~13.3
+At each search node, testing all 18 moves includes redundant branches that immediately undo previous moves. IDDFS applies our WCA move-pruning heuristics:
+1. **No Consecutive Turns on Same Face:** If the last move was on face $R$, ignore $R, R', R2$ (eliminates 3 branches).
+2. **No Commuting Opposite Face Sandwiches:** If previous moves were $R \to L$, ignore $R$ (eliminates 3 branches).
+
+This reduces the effective branching factor:
+$$\text{Branching Factor: } 18 \longrightarrow 15 \longrightarrow \approx 13.3$$
+
+For a depth 5 search:
+* Unpruned: $18^5 \approx 1.88 \times 10^6$ states
+* Pruned: $18 \times 15 \times 13.3^3 \approx 6.3 \times 10^5$ states (approx. **66% search space reduction**)
+
+### 15.3 Algorithm Implementation & Early Goal Check
+```cpp
+bool dfs(const Cube& current, std::size_t depthRemaining, int lastFace, int secondLastFace, std::vector<Move>& path) {
+  for (std::size_t i = 0; i < MoveCount; ++i) {
+    const std::size_t face = i / 3;
+    if (isRedundantMove(face, lastFace, secondLastFace)) {
+      continue;
+    }
+
+    const Move move = static_cast<Move>(i);
+    Cube nextCube = current;
+    nextCube.apply(move);
+
+    // Early goal check
+    if (nextCube.isSolved()) {
+      path.push_back(move);
+      return true;
+    }
+
+    if (depthRemaining > 1) {
+      path.push_back(move);
+      if (dfs(nextCube, depthRemaining - 1, static_cast<int>(face), lastFace, path)) {
+        return true;
+      }
+      path.pop_back(); // Backtrack
+    }
+  }
+  return false;
+}
+```
+
+### 15.4 Memory Comparison: BFS vs. IDDFS
+
+| Metric | BFS (`solveBfs`) | IDDFS (`solveIddfs`) |
+|---|:---:|:---:|
+| **Optimal Path Guarantee?** | ✔ Yes | ✔ Yes |
+| **Memory at Depth 4** | $\approx 8 \text{ MB}$ | $< 1 \text{ KB}$ |
+| **Memory at Depth 6** | $\approx 2.5 \text{ GB}$ | $< 1 \text{ KB}$ |
+| **Memory at Depth 7** | 💥 Crash ($> 45 \text{ GB}$) | **$< 1 \text{ KB}$ (Safe)** |
+| **Primary Data Structure** | `std::queue` + `std::unordered_set` | Call stack + `std::vector<Move>` |
+| **Maximum Feasible Depth** | 4 moves | 6 to 7 moves |

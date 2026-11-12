@@ -23,7 +23,7 @@ All project learning notes have been organized into dedicated, topic-specific ma
 
 3. 📂 **[Testing & CTest Notes](testing.md)**
    - Testing invariants and regression prevention
-   - Complete breakdown of all 86 automated tests in `CubeTests.cpp` across 15 verification suites (invariants, face rotations, primes, double turns, WCA notation parser/formatter, hashing, BFS solver, random scrambler, and 2D net visualizer)
+   - Complete breakdown of all 91 automated tests in `CubeTests.cpp` across 16 verification suites (invariants, face rotations, primes, double turns, WCA notation parser/formatter, hashing, BFS solver, random scrambler, 2D net visualizer, and IDDFS deep solver)
    - CTest execution and expected output
    - Modern C++ Test Syntax Guide: working with `std::optional` in assertions (`.has_value()`, arrow operator `->` vs dot `.`, `.front()` vector access, and dereference unwrapping `*`)
 
@@ -46,3 +46,4 @@ All project learning notes have been organized into dedicated, topic-specific ma
    - Solver Limits & Search Theory: `maxDepth` safety brake against $18^d$ state explosion, RAM consumption thresholds (depth 1 to 7), God's Number (20 moves), and why brute-force BFS necessitates successor algorithms (IDDFS, IDA*, Kociemba's Two-Phase Algorithm)
    - Search Engine Code Architecture: Anonymous namespace internal linkage (`SearchNode`), line-by-line while-loop breakdown, early goal check optimization (up to 90% memory savings), move semantics (`std::move` vs `Move` enum), and $O(1)$ visited set pruning
    - Random Scrambler & 2D Net Visualizer: WCA non-canceling move generation rules, bitwise opposite face mapping (`face ^ 1`), ANSI 24-bit/16-color 2D cross layout (`Cube::printNet`), and interactive console CLI architecture
+   - IDDFS Deep Search Engine: Combining BFS optimality with $O(d)$ linear stack memory, move-pruning heuristics (reducing branching from 18 to ~13.3), and recursive backtracking solving beyond the BFS 4-move barrier

@@ -767,6 +767,58 @@ netCube.printNet(false);
 ```
 - **Verifies**: `Cube::printNet` renders the 6-face cross layout without exceptions, buffer overruns, or index crashes.
 
+### Test 87: `solveIddfs` on Already-Solved Cube (0-Move Base Case)
+```cpp
+Cube iddfsSolvedCube;
+auto iddfsSolvedRes = Solver::solveIddfs(iddfsSolvedCube, 4);
+assert(iddfsSolvedRes.has_value());
+assert(iddfsSolvedRes->empty());
+```
+- **Verifies**: Base-case short circuit returns an empty move vector for already-solved cubes without recursion.
+
+### Test 88: `solveIddfs` 1-Move Scramble Inversion ($R \to R'$)
+```cpp
+Cube iddfsSingleCube;
+iddfsSingleCube.apply(Move::R);
+auto iddfsSingleSolution = Solver::solveIddfs(iddfsSingleCube, 4);
+assert(iddfsSingleSolution.has_value() && iddfsSingleSolution->size() == 1);
+assert(iddfsSingleSolution->front() == Move::R_PRIME);
+iddfsSingleCube.apply(*iddfsSingleSolution);
+assert(iddfsSingleCube.isSolved());
+```
+- **Verifies**: Depth-1 DFS inversion discovers the exact inverse move and restores the cube.
+
+### Test 89: `solveIddfs` 3-Move Optimal Sequence
+```cpp
+Cube iddfsThreeCube;
+iddfsThreeCube.apply("U F R");
+auto iddfsThreeSolution = Solver::solveIddfs(iddfsThreeCube, 4);
+assert(iddfsThreeSolution.has_value() && iddfsThreeSolution->size() == 3);
+iddfsThreeCube.apply(*iddfsThreeSolution);
+assert(iddfsThreeCube.isSolved());
+```
+- **Verifies**: Iterative deepening explores depths 1, 2, and 3, finding the optimal 3-move sequence for multi-axis scrambles.
+
+### Test 90: `solveIddfs` Solves 5-Move Scramble Beyond BFS Limit
+```cpp
+Cube iddfsDeepCube;
+iddfsDeepCube.apply("R U R' U' F"); // 5 moves deep
+auto iddfsDeepSolution = Solver::solveIddfs(iddfsDeepCube, 5);
+assert(iddfsDeepSolution.has_value() && iddfsDeepSolution->size() == 5);
+iddfsDeepCube.apply(*iddfsDeepSolution);
+assert(iddfsDeepCube.isSolved());
+```
+- **Verifies**: Solves a 5-move scramble that breaks past the BFS 4-move memory boundary with $O(d)$ linear memory.
+
+### Test 91: `solveIddfs` Bounded Search Rejection
+```cpp
+Cube iddfsExceedCube;
+iddfsExceedCube.apply("R U R' U' F"); // 5 moves deep
+auto iddfsExceeded = Solver::solveIddfs(iddfsExceedCube, 3);
+assert(!iddfsExceeded.has_value());
+```
+- **Verifies**: Returns `std::nullopt` when a scramble requires more moves than `maxDepth`.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -868,6 +920,11 @@ PASS: Scrambler strictly prevents consecutive moves on identical faces.
 PASS: Scrambler is deterministic when initialized with identical seeds.
 PASS: Scrambler::generateString round-trips accurately through Notation::parseAlgorithm.
 PASS: Cube::printNet renders 2D net cleanly without error.
+PASS: solveIddfs returns empty move vector (0 moves) on already-solved cube.
+PASS: solveIddfs finds optimal 1-move solution (R') for R turn and restores solved state.
+PASS: solveIddfs finds optimal 3-move solution for 'U F R' scramble.
+PASS: solveIddfs successfully solves 5-move scramble with zero memory overhead.
+PASS: solveIddfs returns std::nullopt when scramble exceeds allowed depth limit.
 ```
 
 ---
