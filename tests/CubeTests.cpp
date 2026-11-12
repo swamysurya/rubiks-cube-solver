@@ -1,5 +1,6 @@
 #include "Cube.hpp"
 #include "Notation.hpp"
+#include "Solver.hpp"
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -791,6 +792,54 @@ int main() {
   assert(visitedCubes.size() == 2);
   assert(visitedCubes.contains(turnedCube));
   std::cout << "PASS: std::unordered_set<Cube> successfully stores states and rejects duplicates in O(1).\n";
+
+  // =========================================================================
+  // 14. BFS Solver Engine Tests
+  // =========================================================================
+
+  // Test 77: solveBfs returns empty vector (0 moves) when cube is already solved
+  Cube alreadySolvedCube;
+  auto solvedResult = Solver::solveBfs(alreadySolvedCube);
+  assert(solvedResult.has_value());
+  assert(solvedResult->empty());
+  std::cout << "PASS: solveBfs returns empty move vector (0 moves) on already-solved cube.\n";
+
+  // Test 78: solveBfs solves single-move scramble (F) with 1 move (F')
+  Cube singleMoveCube;
+  singleMoveCube.apply(Move::F);
+  assert(!singleMoveCube.isSolved());
+  auto singleMoveSolution = Solver::solveBfs(singleMoveCube);
+  assert(singleMoveSolution.has_value());
+  assert(singleMoveSolution->size() == 1);
+  assert(singleMoveSolution->front() == Move::F_PRIME);
+  singleMoveCube.apply(*singleMoveSolution);
+  assert(singleMoveCube.isSolved());
+  std::cout << "PASS: solveBfs finds optimal 1-move solution (F') for F turn and restores solved state.\n";
+
+  // Test 79: solveBfs solves multi-move scramble (R U R') with 3-move optimal sequence
+  Cube multiMoveCube;
+  multiMoveCube.apply("R U R'");
+  assert(!multiMoveCube.isSolved());
+  auto multiMoveSolution = Solver::solveBfs(multiMoveCube, 4);
+  assert(multiMoveSolution.has_value());
+  assert(multiMoveSolution->size() == 3);
+  multiMoveCube.apply(*multiMoveSolution);
+  assert(multiMoveCube.isSolved());
+  std::cout << "PASS: solveBfs finds optimal 3-move solution for 'R U R'' scramble and restores solved state.\n";
+
+  // Test 80: solveBfs returns std::nullopt when scramble depth exceeds maxDepth
+  Cube deepScrambleCube;
+  deepScrambleCube.apply("R U R' U' F"); // 5 moves deep
+  auto shallowResult = Solver::solveBfs(deepScrambleCube, 3);
+  assert(!shallowResult.has_value());
+  std::cout << "PASS: solveBfs returns std::nullopt when scramble requires more moves than maxDepth.\n";
+
+  // Test 81: solveBfs returns std::nullopt when maxDepth = 0 on an unsolved cube
+  Cube unsolvedDepthZero;
+  unsolvedDepthZero.apply(Move::U);
+  auto zeroDepthResult = Solver::solveBfs(unsolvedDepthZero, 0);
+  assert(!zeroDepthResult.has_value());
+  std::cout << "PASS: solveBfs returns std::nullopt immediately when maxDepth is 0 for unsolved cube.\n";
 
   return 0;
 }

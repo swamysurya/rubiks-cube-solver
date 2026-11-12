@@ -23,8 +23,9 @@ All project learning notes have been organized into dedicated, topic-specific ma
 
 3. 📂 **[Testing & CTest Notes](testing.md)**
    - Testing invariants and regression prevention
-   - Complete breakdown of all 5 assertions in `CubeTests.cpp`
+   - Complete breakdown of all 81 automated tests in `CubeTests.cpp` across 14 verification suites (invariants, face rotations, primes, double turns, WCA notation parser/formatter, hashing, and BFS solver)
    - CTest execution and expected output
+   - Modern C++ Test Syntax Guide: working with `std::optional` in assertions (`.has_value()`, arrow operator `->` vs dot `.`, `.front()` vector access, and dereference unwrapping `*`)
 
 4. 📂 **[Rubik's Cube Code & Domain Logic Notes](cube-logic.md)**
    - 5-layer software architecture diagram

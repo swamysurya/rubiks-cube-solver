@@ -669,6 +669,58 @@ assert(visitedCubes.contains(turnedCube));
 ```
 - **Verifies**: `Cube` seamlessly functions as a key in standard hash-based containers (`std::unordered_set`), enabling $O(1)$ duplicate rejection and fast visited-state tracking.
 
+### Test 77: `solveBfs` on Already-Solved Cube (0-Move Base Case)
+```cpp
+Cube alreadySolvedCube;
+auto solvedResult = Solver::solveBfs(alreadySolvedCube);
+assert(solvedResult.has_value());
+assert(solvedResult->empty());
+```
+- **Verifies**: Base-case short-circuit returns `has_value() == true` with an empty vector (0 moves needed) immediately without allocating search structures.
+
+### Test 78: `solveBfs` Single-Move Scramble Inversion ($F \to F'$)
+```cpp
+Cube singleMoveCube;
+singleMoveCube.apply(Move::F);
+auto singleMoveSolution = Solver::solveBfs(singleMoveCube);
+assert(singleMoveSolution.has_value());
+assert(singleMoveSolution->size() == 1);
+assert(singleMoveSolution->front() == Move::F_PRIME);
+singleMoveCube.apply(*singleMoveSolution);
+assert(singleMoveCube.isSolved());
+```
+- **Verifies**: Optimal depth-1 inversion: the BFS engine correctly identifies `F'` as the single inverse move and applying it restores `isSolved() == true`.
+
+### Test 79: `solveBfs` Multi-Move Scramble & Optimal Shortest Path
+```cpp
+Cube multiMoveCube;
+multiMoveCube.apply("R U R'");
+auto multiMoveSolution = Solver::solveBfs(multiMoveCube, 4);
+assert(multiMoveSolution.has_value());
+assert(multiMoveSolution->size() == 3);
+multiMoveCube.apply(*multiMoveSolution);
+assert(multiMoveCube.isSolved());
+```
+- **Verifies**: Finds optimal 3-move sequence for $R \cdot U \cdot R'$, proving multi-level FIFO branch traversal and verifying that applying the sequence returns the cube to the solved state.
+
+### Test 80: `solveBfs` Depth Exceeded Returns `std::nullopt`
+```cpp
+Cube deepScrambleCube;
+deepScrambleCube.apply("R U R' U' F"); // 5 moves deep
+auto shallowResult = Solver::solveBfs(deepScrambleCube, 3);
+assert(!shallowResult.has_value());
+```
+- **Verifies**: When the shortest solution exceeds `maxDepth`, the solver gracefully terminates and returns `std::nullopt` rather than looping indefinitely or exhausting memory.
+
+### Test 81: `solveBfs` Depth Zero Invariant
+```cpp
+Cube unsolvedDepthZero;
+unsolvedDepthZero.apply(Move::U);
+auto zeroDepthResult = Solver::solveBfs(unsolvedDepthZero, 0);
+assert(!zeroDepthResult.has_value());
+```
+- **Verifies**: Guard clause ensures `maxDepth = 0` on an unsolved cube returns `std::nullopt` immediately without generating search nodes.
+
 ---
 
 ## 3. Running Tests with CTest
@@ -760,6 +812,100 @@ PASS: parseAlgorithm throws std::invalid_argument on malformed algorithm string.
 PASS: std::hash<Cube> is deterministic (identical states yield identical hashes).
 PASS: std::hash<Cube> is sensitive (different states yield different hashes).
 PASS: std::unordered_set<Cube> successfully stores states and rejects duplicates in O(1).
+PASS: solveBfs returns empty move vector (0 moves) on already-solved cube.
+PASS: solveBfs finds optimal 1-move solution (F') for F turn and restores solved state.
+PASS: solveBfs finds optimal 3-move solution for 'R U R'' scramble and restores solved state.
+PASS: solveBfs returns std::nullopt when scramble requires more moves than maxDepth.
+PASS: solveBfs returns std::nullopt immediately when maxDepth is 0 for unsolved cube.
 ```
+
+---
+
+## 4. Modern C++ Test Syntax Guide: Working with `std::optional` in Tests
+
+When writing assertions for functions that return modern C++ wrapper types (like `std::optional<std::vector<Move>>`), specific operators and idiomatic syntax patterns are used.
+
+### 4.1 The `assert(...)` Macro
+* Defined in `<cassert>`.
+* Evaluates a boolean expression:
+  * If `true`: execution proceeds silently.
+  * If `false`: immediately aborts the program and prints the exact line number, file, and failing condition.
+* The logical NOT operator (`!`) tests negative conditions:
+  ```cpp
+  assert(!singleMoveCube.isSolved()); // Asserts that the cube is NOT solved
+  ```
+
+### 4.2 Type Deduction with `auto`
+```cpp
+auto singleMoveSolution = Solver::solveBfs(singleMoveCube);
 ```
+* Replaces the verbose type declaration `std::optional<std::vector<Move>>`.
+* The compiler automatically deduces the exact type from the function signature, keeping tests clean while maintaining full compile-time type safety.
+
+### 4.3 Namespace Scope Resolution (`::`)
+```cpp
+Solver::solveBfs(singleMoveCube);
+```
+* The double colon (`::`) identifies that `solveBfs` is declared inside `namespace Solver`, preventing naming collisions with other global functions.
+
+### 4.4 Checking Presence with `.has_value()`
+`std::optional` acts as a type-safe container that either holds a value or is empty (`std::nullopt`).
+```text
+           ┌───────────────────────────────┐
+           │    std::optional (The Box)    │
+           └───────────────┬───────────────┘
+                           │
+           ┌───────────────┴───────────────┐
+           ▼                               ▼
+  [ Box contains a Value ]        [ Box is Empty ]
+    .has_value() == true           .has_value() == false
+    "Solution discovered!"         "Search failed / nullopt"
+```
+* **Why check first?** Attempting to access an empty optional directly throws a `std::bad_optional_access` exception.
+* Verifying success: `assert(singleMoveSolution.has_value());`
+* Verifying expected failure: `assert(!shallowResult.has_value());`
+
+### 4.5 Reaching Inside with the Arrow Operator (`->`)
+The arrow operator (`->`) is formed by two characters: `-` (minus) and `>` (greater-than).
+It visually represents **pointing into the wrapper box** to invoke methods on the object inside:
+
+```text
+singleMoveSolution ──( Reach inside )──▶ std::vector ──▶ .size()
+        │                                    ▲
+        └───────────────── -> ───────────────┘
+```
+
+* `singleMoveSolution` is the `std::optional` box. The box itself does not have a `.size()` or `.empty()` method.
+* `singleMoveSolution->empty()` reaches into the box to invoke `std::vector::empty()`.
+* `singleMoveSolution->size()` invokes `std::vector::size()`.
+* `singleMoveSolution->front()` invokes `std::vector::front()`.
+
+| Syntax | Target of Method Call | Valid? |
+|---|---|:---:|
+| `solution.has_value()` | Calls method on the `std::optional` wrapper itself | ✔ |
+| `solution.size()` | Fails: `std::optional` has no `.size()` | ❌ |
+| `solution->size()` | Points through wrapper to call `.size()` on `std::vector` | ✔ |
+| `solution.value().size()` | Verbose equivalent of `solution->size()` | ✔ |
+
+### 4.6 Retrieving the First Element with `.front()`
+```cpp
+assert(singleMoveSolution->front() == Move::F_PRIME);
+```
+* On `std::vector`, `.front()` returns a reference to the very first element (index `0`).
+* It is the idiomatic, expressive equivalent of `(*singleMoveSolution)[0]`, reading cleanly in test assertions.
+
+### 4.7 Unwrapping with the Dereference Operator (`*`)
+```cpp
+singleMoveCube.apply(*singleMoveSolution);
+```
+#### Why is the asterisk (`*`) required?
+Look at the type requirement of `Cube::apply`:
+```cpp
+void Cube::apply(const std::vector<Move>& sequence);
+```
+* `Cube::apply` expects a bare **`std::vector<Move>`**.
+* `singleMoveSolution` is of type **`std::optional<std::vector<Move>>`**.
+* Passing `singleMoveSolution` directly causes a compiler error (`no matching function call`).
+* The asterisk (`*`) is the **dereference operator**; it acts as a "box opener", unwrapping the `std::optional` and extracting the underlying `std::vector<Move>` so it can be passed to `Cube::apply`.
+* `*singleMoveSolution` is the idiomatic shorthand for `singleMoveSolution.value()`.
 
